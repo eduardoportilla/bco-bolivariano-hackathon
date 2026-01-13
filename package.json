@@ -2,8 +2,10 @@
   "name": "banco-bolivariano-hackathon",
   "private": true,
   "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
+    "dev:mobile": "turbo dev --filter=mobile",
+    "dev:web": "turbo dev --filter=web",
+    "build:mobile": "turbo build --filter=mobile",
+    "build:web": "turbo build --filter=web",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
