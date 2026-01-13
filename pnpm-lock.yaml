@@ -124,6 +124,9 @@ importers:
       '@eslint/js':
         specifier: ^9.39.1
         version: 9.39.2
+      '@originjs/vite-plugin-federation':
+        specifier: ^1.4.1
+        version: 1.4.1
       '@types/node':
         specifier: ^24.10.1
         version: 24.10.7
