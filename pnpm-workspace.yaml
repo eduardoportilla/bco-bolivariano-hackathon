@@ -2,8 +2,6 @@ packages:
   - apps/*
   - packages/*
 
-nodeLinker: hoisted
-
 onlyBuiltDependencies:
   - esbuild
   - unrs-resolver
