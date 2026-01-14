@@ -20,6 +20,8 @@ Read the [Framework Guide](docs/agents/FRAMEWORK.md) for the spec-driven develop
 | Architecture | [guidelines/architecture.md](docs/agents/guidelines/architecture.md) |
 | Security | [guidelines/security.md](docs/agents/guidelines/security.md) |
 | Mobile | [guidelines/mobile.md](docs/agents/guidelines/mobile.md) |
+| Testing | [guidelines/testing.md](docs/agents/guidelines/testing.md) |
+| Creating Guidelines | [guidelines/_how_to.md](docs/agents/guidelines/_how_to.md) |
 
 ---
 

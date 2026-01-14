@@ -20,6 +20,207 @@ bbh/
 
 ---
 
+## Feature-Based Organization
+
+Organize application code by **feature/domain**, not by file type.
+
+### Web App Structure
+
+```
+apps/web-auth/src/
+├── features/                    # Feature modules (domain-driven)
+│   ├── login/
+│   │   ├── components/          # Feature-specific components
+│   │   │   ├── LoginForm.tsx
+│   │   │   └── BiometricButton.tsx
+│   │   ├── hooks/               # Feature-specific hooks
+│   │   │   └── useLogin.ts
+│   │   ├── services/            # Feature-specific API calls
+│   │   │   └── login.service.ts
+│   │   ├── types/               # Feature-specific types
+│   │   │   └── login.types.ts
+│   │   ├── LoginPage.tsx        # Page/Screen component
+│   │   └── index.ts             # Public API (re-exports)
+│   ├── password-recovery/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── ...
+│   └── mfa/
+│       └── ...
+├── shared/                      # Cross-feature shared code
+│   ├── components/              # Reusable UI (non-domain specific)
+│   │   └── Loading.tsx
+│   ├── hooks/                   # Shared hooks
+│   │   └── useLocalStorage.ts
+│   ├── services/                # Shared services
+│   │   └── analytics.service.ts
+│   ├── utils/                   # Utility functions
+│   │   └── validation.ts
+│   └── types/                   # Shared types
+│       └── common.types.ts
+├── config/                      # App configuration
+│   └── routes.ts
+└── app/                         # App bootstrap
+    ├── App.tsx
+    ├── providers.tsx
+    └── router.tsx
+```
+
+### Mobile App Structure
+
+```
+apps/mobile/src/
+├── features/
+│   ├── auth/
+│   │   ├── screens/             # Screens instead of pages
+│   │   │   ├── LoginScreen.tsx
+│   │   │   └── BiometricScreen.tsx
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   └── index.ts
+│   ├── dashboard/
+│   ├── accounts/
+│   └── transfers/
+├── shared/
+│   ├── components/
+│   ├── hooks/
+│   └── navigation/
+│       ├── RootNavigator.tsx
+│       └── types.ts
+├── constants/
+│   ├── colors.ts
+│   ├── spacing.ts
+│   └── typography.ts
+└── app/
+    └── App.tsx
+```
+
+---
+
+## Module Boundaries
+
+### Feature Public API
+
+Each feature exposes only what's needed via `index.ts`:
+
+```typescript
+// features/login/index.ts
+// Only export what other features need
+export { LoginPage } from './LoginPage';
+export type { LoginCredentials } from './types/login.types';
+
+// Don't export internal components/hooks
+// export { LoginForm } from './components/LoginForm'; // INTERNAL
+```
+
+### Import Rules
+
+```typescript
+// GOOD: Import from feature's public API
+import { LoginPage } from '@/features/login';
+
+// BAD: Import from feature internals
+import { LoginForm } from '@/features/login/components/LoginForm';
+
+// GOOD: Import shared utilities
+import { Loading } from '@/shared/components';
+import { useLocalStorage } from '@/shared/hooks';
+```
+
+### Dependency Direction
+
+```
+┌─────────────────────────────────────────┐
+│                  app/                   │
+│         (bootstraps everything)         │
+└────────────────────┬────────────────────┘
+                     │ imports
+                     ▼
+┌─────────────────────────────────────────┐
+│              features/*                 │
+│     (self-contained domain modules)     │
+└────────────────────┬────────────────────┘
+                     │ imports
+                     ▼
+┌─────────────────────────────────────────┐
+│               shared/                   │
+│      (cross-cutting utilities)          │
+└────────────────────┬────────────────────┘
+                     │ imports
+                     ▼
+┌─────────────────────────────────────────┐
+│           @repo/* packages              │
+│        (ui, core, types, etc.)          │
+└─────────────────────────────────────────┘
+```
+
+**Rules:**
+- Features can import from `shared/` and `@repo/*`
+- Features must NOT import from other features (use events/stores for communication)
+- `shared/` can only import from `@repo/*`
+- `app/` can import from anywhere
+
+---
+
+## Scalability Patterns
+
+### When to Create a Feature
+
+Create a new feature folder when:
+- It has its own page/screen
+- It has domain-specific logic (services, types, hooks)
+- It can be developed/tested independently
+
+### When to Move to Shared
+
+Move code to `shared/` when:
+- Used by 2+ features
+- Not domain-specific (generic utilities)
+- Could be reused in other apps
+
+### When to Extract to Package
+
+Move code to `packages/` when:
+- Used by 2+ apps (web + mobile)
+- Stable API, versioned independently
+- Example: `@repo/core` for shared services
+
+### File Size Guidelines
+
+| Threshold | Action |
+|-----------|--------|
+| Component > 200 lines | Split into sub-components |
+| Hook > 100 lines | Extract helper functions |
+| Service > 150 lines | Split by responsibility |
+| Feature > 15 files | Consider sub-features |
+
+---
+
+## Colocation Principle
+
+Keep related code close together:
+
+```typescript
+// GOOD: Feature-specific hook lives with feature
+features/transfers/
+├── hooks/
+│   └── useTransfer.ts    // Only used by transfers
+└── TransferPage.tsx
+
+// GOOD: Shared hook in shared folder
+shared/hooks/
+└── useDebounce.ts        // Used by multiple features
+
+// BAD: All hooks in root hooks folder
+src/hooks/
+├── useTransfer.ts        // Transfer-specific
+├── useAccounts.ts        // Accounts-specific
+└── useDebounce.ts        // Shared
+```
+
+---
+
 ## Microfrontends (Module Federation)
 
 ### Shell (Host)
