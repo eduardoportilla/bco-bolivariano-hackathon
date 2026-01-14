@@ -1,13 +1,28 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import federation from '@originjs/vite-plugin-federation';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react({
-      babel: {
-        plugins: [['babel-plugin-react-compiler']],
+    tailwindcss(),
+    react(),
+    federation({
+      name: 'webAuth',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './LoginPage': './src/pages/LoginPage.tsx',
       },
+      shared: ['react', 'react-dom', 'react-router-dom'],
     }),
   ],
-})
+  build: {
+    modulePreload: false,
+    target: 'esnext',
+    minify: false,
+    cssCodeSplit: false,
+  },
+  server: {
+    port: 3001,
+  },
+});

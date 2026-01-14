@@ -1,35 +1,89 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Button } from '@repo/ui/components/Button';
+import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/Card';
 
-function App() {
-  const [count, setCount] = useState(0)
+const RemoteLogin = lazy(() => import('webAuth/LoginPage'));
 
+function HomePage() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold">Banco Bolivariano</h1>
+          <nav className="flex gap-4">
+            <Link to="/">
+              <Button variant="ghost">Inicio</Button>
+            </Link>
+            <Link to="/login">
+              <Button>Ingresar</Button>
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Cuentas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Consulta tus saldos y movimientos en tiempo real.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Transferencias</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Realiza transferencias de forma segura y rapida.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Pagos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Paga tus servicios desde cualquier lugar.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
 }
 
-export default App
+function Loading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-muted-foreground">Cargando...</p>
+    </div>
+  );
+}
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/login"
+          element={
+            <Suspense fallback={<Loading />}>
+              <RemoteLogin />
+            </Suspense>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
