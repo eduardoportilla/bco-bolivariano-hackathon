@@ -21,7 +21,7 @@ module.exports = mergeConfig(config, {
     ],
     blockList: [
       // Exclude android build directory to prevent Metro watcher crashes
-      /[\/\\]android[\/\\]app[\/\\]\.cxx[\/\\]/,
+      /[/\\]android[/\\]app[/\\]\.cxx[/\\]/,
     ].concat(config.resolver.blockList),
   },
 });

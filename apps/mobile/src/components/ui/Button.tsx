@@ -5,7 +5,6 @@ import {
   StyleSheet,
   type PressableProps,
   type ViewStyle,
-  type TextStyle,
 } from 'react-native';
 import { colors, spacing, typography } from '../../constants';
 

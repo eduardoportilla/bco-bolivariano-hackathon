@@ -26,7 +26,7 @@ export function LoginScreen() {
   async function handleLogin() {
     setIsLoading(true);
     // Simulate login
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
     setIsLoading(false);
   }
 
