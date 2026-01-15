@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { transferKeys, accountKeys, type CreateTransferData } from '@repo/core/domains/transfers';
+import { transferKeys, type CreateTransferData, type Transfer } from '@repo/core/domains/transfers';
+import { accountKeys } from '@repo/core/domains/accounts';
 import { transfersService } from '@/services';
 
 /**
@@ -27,7 +28,7 @@ export function useCancelTransfer() {
 
   return useMutation({
     mutationFn: (id: string) => transfersService.cancel(id),
-    onSuccess: (data) => {
+    onSuccess: (data: Transfer) => {
       // Update the specific transfer in cache
       queryClient.setQueryData(transferKeys.detail(data.id), data);
       // Invalidate transfers list

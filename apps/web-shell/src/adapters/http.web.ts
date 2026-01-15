@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosError } from 'axios';
+import axios, { type AxiosInstance, type AxiosError, type AxiosResponse } from 'axios';
 import type { HttpClient, HttpError } from '@repo/core/adapters';
 
 /**
@@ -16,7 +16,7 @@ function createAxiosInstance(): AxiosInstance {
 
   // Response interceptor for error handling
   instance.interceptors.response.use(
-    (response) => response,
+    (response: AxiosResponse) => response,
     (error: AxiosError<HttpError>) => {
       if (error.response?.status === 401) {
         // Redirect to login on unauthorized

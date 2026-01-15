@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authKeys, type LoginCredentials } from '@repo/core/domains/auth';
+import { authKeys, type LoginCredentials, type AuthResponse } from '@repo/core/domains/auth';
 import { authService } from '@/services';
 
 /**
@@ -10,7 +10,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
-    onSuccess: (data) => {
+    onSuccess: (data: AuthResponse) => {
       // Set user data in cache
       queryClient.setQueryData(authKeys.user(), data.user);
     },
