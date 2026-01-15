@@ -4,61 +4,92 @@ Standards for API services, configuration, forms, state management, and error ha
 
 ---
 
-## API Client
+## HTTP Client Factory
 
-> **Important:** Always use Axios for HTTP requests. Do not use the native `fetch` API. Axios provides better defaults, interceptors for auth/error handling, automatic JSON transformation, and cleaner error objects.
+The `@repo/core` package provides a `createHttpClient` factory that reduces code duplication across platforms while allowing platform-specific customization.
 
-### Web (Axios + React Query)
+> **Important:** Always use the `createHttpClient` factory from `@repo/core/adapters`. Do not use the native `fetch` API or create axios instances directly in apps.
+
+### Factory API
 
 ```typescript
-// shared/services/api/client.ts
-import axios from 'axios';
+import { createHttpClient } from '@repo/core/adapters';
 
-export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  timeout: 30000,
-  headers: { 'Content-Type': 'application/json' },
-});
+// Configuration options
+interface HttpClientConfig {
+  baseURL: string;              // Required: API base URL
+  timeout?: number;             // Default: 30000ms
+  withCredentials?: boolean;    // Default: false (for cookie auth)
+  headers?: Record<string, string>;
+}
 
-// Request interceptor
-apiClient.interceptors.request.use((config) => {
-  // Tokens handled via httpOnly cookies (set by backend)
-  return config;
-});
+// Interceptors for platform-specific behavior
+interface HttpClientInterceptors {
+  onRequest?: (config) => config | Promise<config>;
+  onResponse?: (response) => response;
+  onError?: (error) => Promise<never>;
+}
+```
 
-// Response interceptor
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Redirect to login or refresh token
-    }
-    return Promise.reject(error);
+### Web Implementation
+
+```typescript
+// apps/web-*/src/adapters/http.web.ts
+import { createHttpClient } from '@repo/core/adapters';
+
+export const httpClient = createHttpClient(
+  {
+    baseURL: import.meta.env.VITE_API_URL || '/api',
+    withCredentials: true, // Send httpOnly cookies
+  },
+  {
+    onError: (error) => {
+      if (error.response?.status === 401) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error.response?.data ?? error);
+    },
   }
 );
 ```
 
-### Mobile (Axios + React Query)
+### Mobile Implementation
 
 ```typescript
-// services/api/client.ts
-import axios from 'axios';
+// apps/mobile/src/adapters/http.mobile.ts
 import Config from 'react-native-config';
-import { secureStorage } from '../security/secureStorage';
+import { createHttpClient } from '@repo/core/adapters';
+import { secureStorage } from '../services/security/secureStorage';
 
-export const apiClient = axios.create({
-  baseURL: Config.API_URL,
-  timeout: 30000,
-});
-
-apiClient.interceptors.request.use(async (config) => {
-  const token = await secureStorage.getItem('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+export const httpClient = createHttpClient(
+  {
+    baseURL: Config.API_URL || 'http://localhost:3000/api',
+  },
+  {
+    onRequest: async (config) => {
+      const token = await secureStorage.getItem('accessToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    onError: async (error) => {
+      if (error.response?.status === 401) {
+        await secureStorage.removeItem('accessToken');
+        await secureStorage.removeItem('refreshToken');
+      }
+      return Promise.reject(error.response?.data ?? error);
+    },
   }
-  return config;
-});
+);
 ```
+
+### Benefits
+
+- **Reduced duplication**: Common config (timeout, headers, Content-Type) defined once in factory
+- **Platform flexibility**: Each app can customize auth, error handling, base URL
+- **Type safety**: Full TypeScript support with `HttpClient` interface
+- **Testability**: Easy to mock the `HttpClient` interface in tests
 
 ---
 

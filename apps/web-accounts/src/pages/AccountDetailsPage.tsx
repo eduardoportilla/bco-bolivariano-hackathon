@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { formatCurrency, formatDate } from '@repo/core/shared/utils';
 import { Button } from '@repo/ui/components/Button';
 import {
   Card,
@@ -8,27 +9,6 @@ import {
   CardContent,
 } from '@repo/ui/components/Card';
 import { useAccount, useTransactions } from '../hooks';
-
-/**
- * Format currency amount.
- */
-function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat('es-EC', {
-    style: 'currency',
-    currency,
-  }).format(amount);
-}
-
-/**
- * Format date for display.
- */
-function formatDate(dateString: string): string {
-  return new Intl.DateTimeFormat('es-EC', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(dateString));
-}
 
 /**
  * Account type labels in Spanish.

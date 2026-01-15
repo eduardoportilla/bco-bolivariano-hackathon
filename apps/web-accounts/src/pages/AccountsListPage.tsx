@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Account } from '@repo/core/domains/accounts';
+import { formatCurrency } from '@repo/core/shared/utils';
 import { Button } from '@repo/ui/components/Button';
 import {
   Card,
@@ -9,16 +10,6 @@ import {
   CardContent,
 } from '@repo/ui/components/Card';
 import { useAccounts } from '../hooks';
-
-/**
- * Format currency amount.
- */
-function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat('es-EC', {
-    style: 'currency',
-    currency,
-  }).format(amount);
-}
 
 /**
  * Account type labels in Spanish.

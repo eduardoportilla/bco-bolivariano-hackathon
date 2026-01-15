@@ -4,11 +4,31 @@ description: Service, API, and state patterns
 
 # Services and State
 
-## HTTP Client
+## HTTP Client Factory
 
-- Use Axios for all HTTP requests (never use fetch directly)
-- Axios provides better error handling, interceptors, and request/response transformation
-- See `docs/guidelines/services.md` for client configuration patterns
+Use the `createHttpClient` factory from `@repo/core/adapters`:
+
+```typescript
+// apps/web-*/src/adapters/http.web.ts
+import { createHttpClient } from '@repo/core/adapters';
+
+export const httpClient = createHttpClient(
+  {
+    baseURL: import.meta.env.VITE_API_URL || '/api',
+    withCredentials: true, // for httpOnly cookies
+  },
+  {
+    onError: (error) => {
+      if (error.response?.status === 401) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error.response?.data ?? error);
+    },
+  }
+);
+```
+
+Never create axios instances directly. The factory handles common config (timeout, headers, Content-Type).
 
 ## Core Package Services
 
@@ -32,6 +52,18 @@ import { httpClient } from '../adapters/http.web';
 import { createAccountsService } from '@repo/core/domains/accounts';
 
 export const accountsService = createAccountsService(httpClient);
+```
+
+## Shared Utilities
+
+Always use formatters and validators from `@repo/core`:
+
+```typescript
+// GOOD
+import { formatCurrency, formatDate, maskAccountNumber } from '@repo/core/shared/utils';
+
+// BAD - never redefine locally
+function formatCurrency(amount, currency) { ... }
 ```
 
 ## Query Keys (from Core)

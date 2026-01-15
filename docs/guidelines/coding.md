@@ -128,6 +128,40 @@ try {
 
 ---
 
+## Shared Utilities
+
+Always use shared utilities from `@repo/core` instead of redefining them locally.
+
+### Formatters
+
+```typescript
+// GOOD: Import from @repo/core
+import { formatCurrency, formatDate, formatRelativeTime, maskAccountNumber } from '@repo/core/shared/utils';
+
+// BAD: Redefining locally
+function formatCurrency(amount: number, currency: string): string {
+  return new Intl.NumberFormat('es-EC', { style: 'currency', currency }).format(amount);
+}
+```
+
+### Available Formatters
+
+| Function | Description | Example |
+|----------|-------------|---------|
+| `formatCurrency(amount, currency)` | Format number as currency | `$1,234.56` |
+| `formatDate(date, style)` | Format date (short/long) | `15 ene 2026` |
+| `formatRelativeTime(date)` | Relative time in Spanish | `hace 2 horas` |
+| `maskAccountNumber(number)` | Mask account number | `****1234` |
+| `formatPhoneNumber(phone)` | Format phone number | `(123) 456-7890` |
+
+### Validators
+
+```typescript
+import { isValidEmail, isValidPhone, isValidAccountNumber, validatePassword } from '@repo/core/shared/utils';
+```
+
+---
+
 ## Forbidden Patterns
 
 ```typescript
@@ -145,4 +179,7 @@ const API_KEY = 'sk-12345'; // BAD
 
 // Never use console.log in production
 console.log('debug', data); // BAD
+
+// Never redefine utilities that exist in @repo/core
+function formatCurrency() {} // BAD - use @repo/core/shared/utils
 ```

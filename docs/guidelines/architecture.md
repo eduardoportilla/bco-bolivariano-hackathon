@@ -53,7 +53,9 @@ packages/core/src/
 
 ### Adapter Pattern
 
-The core package uses dependency injection via adapters to allow platform-specific implementations:
+The core package uses dependency injection via adapters to allow platform-specific implementations.
+
+#### HttpClient Interface
 
 ```typescript
 // packages/core/src/adapters/http.adapter.ts
@@ -61,9 +63,70 @@ export interface HttpClient {
   get<T>(url: string): Promise<T>;
   post<T>(url: string, data?: unknown): Promise<T>;
   put<T>(url: string, data?: unknown): Promise<T>;
+  patch<T>(url: string, data?: unknown): Promise<T>;
   delete<T>(url: string): Promise<T>;
 }
+```
 
+#### HTTP Client Factory
+
+The `createHttpClient` factory creates platform-specific HTTP clients with shared defaults:
+
+```typescript
+// packages/core/src/adapters/http.factory.ts
+import { createHttpClient } from '@repo/core/adapters';
+
+// Creates an HttpClient with common config (timeout, headers, etc.)
+// while allowing platform-specific interceptors for auth and error handling
+export function createHttpClient(
+  config: HttpClientConfig,
+  interceptors?: HttpClientInterceptors
+): HttpClient;
+```
+
+#### Platform Implementations
+
+Each app uses the factory with platform-specific configuration:
+
+```typescript
+// apps/web-*/src/adapters/http.web.ts
+import { createHttpClient } from '@repo/core/adapters';
+
+export const httpClient = createHttpClient(
+  {
+    baseURL: import.meta.env.VITE_API_URL || '/api',
+    withCredentials: true, // httpOnly cookies
+  },
+  {
+    onError: (error) => {
+      if (error.response?.status === 401) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error.response?.data ?? error);
+    },
+  }
+);
+
+// apps/mobile/src/adapters/http.mobile.ts
+import { createHttpClient } from '@repo/core/adapters';
+
+export const httpClient = createHttpClient(
+  { baseURL: Config.API_URL },
+  {
+    onRequest: async (config) => {
+      const token = await secureStorage.getItem('accessToken');
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+      return config;
+    },
+  }
+);
+```
+
+#### Service Factories
+
+Services use the `HttpClient` interface (not concrete implementations):
+
+```typescript
 // packages/core/src/domains/accounts/service.ts
 export function createAccountsService(http: HttpClient) {
   return {
@@ -71,16 +134,6 @@ export function createAccountsService(http: HttpClient) {
     getById: (id: string) => http.get<Account>(API_ENDPOINTS.accounts.detail(id)),
   };
 }
-```
-
-Each app provides its own adapter implementation:
-
-```typescript
-// apps/web-shell/src/adapters/http.web.ts
-// Uses axios with httpOnly cookies
-
-// apps/mobile/src/adapters/http.mobile.ts
-// Uses axios with Keychain/Keystore tokens
 ```
 
 ### Usage in Apps
@@ -101,8 +154,33 @@ export const accountsService = createAccountsService(httpClient);
 | Zod validation schemas | Platform-specific code |
 | Service factories | UI logic |
 | Query key factories | Navigation |
-| Utility functions | Storage implementations |
-| Constants | HTTP client implementations |
+| Utility functions (formatters, validators) | Storage implementations |
+| Constants | Concrete HTTP client instances |
+| HTTP client factory | |
+
+### Shared Utilities
+
+The `@repo/core/shared/utils` module provides common utilities that should be used across all apps:
+
+```typescript
+import {
+  // Formatters
+  formatCurrency,      // Format amounts as currency
+  formatDate,          // Format dates (short/long styles)
+  formatRelativeTime,  // "hace 2 horas"
+  maskAccountNumber,   // "****1234"
+  formatPhoneNumber,   // "(123) 456-7890"
+  
+  // Validators
+  isValidEmail,
+  isValidPhone,
+  isValidAccountNumber,
+  isValidTransferAmount,
+  validatePassword,
+} from '@repo/core/shared/utils';
+```
+
+**Rule:** Never redefine these utilities in apps. Always import from `@repo/core`.
 
 ---
 

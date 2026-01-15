@@ -14,11 +14,11 @@ description: Project architecture - use when creating features
 
 ## Core Package (@repo/core)
 
-Shared types, schemas, services, and utilities:
+Shared types, schemas, services, utilities, and HTTP client factory:
 
 ```
 packages/core/src/
-├── adapters/       # HttpClient, SecureStorage interfaces
+├── adapters/       # HttpClient interface + createHttpClient factory
 ├── domains/        # auth, accounts, transfers
 │   └── [domain]/
 │       ├── types.ts
@@ -26,18 +26,31 @@ packages/core/src/
 │       ├── service.ts
 │       ├── queries.ts
 │       └── index.ts
-└── shared/         # utils, constants
+└── shared/         # utils (formatters, validators), constants
 ```
 
-## Feature Structure (Apps)
+## HTTP Client Factory
 
-```
-features/[name]/
-├── components/
-├── hooks/          # useAccounts, useCreateTransfer
-├── screens/        # Mobile only
-├── [Name]Page.tsx  # Web only
-└── index.ts
+Apps use `createHttpClient` from `@repo/core/adapters`:
+
+```typescript
+// apps/web-*/src/adapters/http.web.ts
+import { createHttpClient } from '@repo/core/adapters';
+
+export const httpClient = createHttpClient(
+  {
+    baseURL: import.meta.env.VITE_API_URL || '/api',
+    withCredentials: true,
+  },
+  {
+    onError: (error) => {
+      if (error.response?.status === 401) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error.response?.data ?? error);
+    },
+  }
+);
 ```
 
 ## Service Pattern (Adapter)
@@ -55,12 +68,34 @@ import { httpClient } from '@/adapters/http.web';
 export const accountsService = createAccountsService(httpClient);
 ```
 
+## Shared Utilities
+
+Always use formatters/validators from `@repo/core/shared/utils`:
+
+```typescript
+import { formatCurrency, formatDate, maskAccountNumber } from '@repo/core/shared/utils';
+
+// Never redefine these locally in apps
+```
+
+## Feature Structure (Apps)
+
+```
+features/[name]/
+├── components/
+├── hooks/          # useAccounts, useCreateTransfer
+├── screens/        # Mobile only
+├── [Name]Page.tsx  # Web only
+└── index.ts
+```
+
 ## Import Rules
 
 - Features: import from shared/, @repo/*, and @/services
 - Never import between features
 - Import types/schemas from @repo/core/domains/*
 - Import services from @/services (app-wired)
+- Import utilities from @repo/core/shared/utils
 
 ## Package Naming
 
