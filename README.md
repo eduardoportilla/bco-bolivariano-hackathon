@@ -31,29 +31,56 @@ pnpm exec playwright install
 
 ## Development
 
-### All Apps
+### Web Microfrontends (Standalone Development)
+
+For active development with hot reload, run each microfrontend independently:
 
 ```bash
-pnpm dev
-```
-
-### Web Only
-
-```bash
+# Shell only (without auth integration)
 pnpm dev --filter web-shell
+
+# Auth only (standalone login page)
 pnpm dev --filter web-auth
 ```
+
+This is the recommended approach for day-to-day development. Each app has full HMR support.
+
+### Web Microfrontends (Integration Testing)
+
+To test both microfrontends integrated (shell + auth):
+
+```bash
+pnpm preview:web
+```
+
+This builds `web-auth` and serves it in preview mode, then runs `web-shell` in dev mode.
+
+- Shell: http://localhost:3000 (dev mode with HMR)
+- Auth remote: http://localhost:3001 (preview mode, **no HMR**)
+
+> **Important:** This is for **integration testing only**, not active development. Changes to web-auth require rebuilding (restart the command). Use standalone mode for development with hot reload.
+
+> **Why preview?** Module Federation requires remotes to be built. The `remoteEntry.js` file is only generated during build, not in pure dev mode.
 
 ### Mobile
 
 ```bash
 cd apps/mobile
 
-# Android
+# Start Metro bundler
+pnpm start
+
+# Android (in separate terminal)
 pnpm android
 
 # iOS (macOS only)
 pnpm ios
+```
+
+### All Apps
+
+```bash
+pnpm dev
 ```
 
 ---
@@ -74,7 +101,8 @@ pnpm build --filter web-shell
 
 | Command | Description |
 |---------|-------------|
-| `pnpm dev` | Start all apps in development |
+| `pnpm dev` | Start all apps in development (with HMR) |
+| `pnpm preview:web` | Test web MFEs integrated (no HMR for remotes) |
 | `pnpm build` | Build all packages and apps |
 | `pnpm lint` | Lint all code |
 | `pnpm typecheck` | TypeScript type checking |

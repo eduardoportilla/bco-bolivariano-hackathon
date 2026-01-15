@@ -1,75 +1,103 @@
-# React + TypeScript + Vite
+# Web Shell (Host MFE)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The main container application that orchestrates all web microfrontends.
 
-Currently, two official plugins are available:
+## Architecture
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This is the **host** in a Module Federation setup. It loads remote modules from other microfrontends at runtime.
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+web-shell (host)
+└── loads webAuth/LoginPage from web-auth (remote)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Standalone Mode (Recommended for Development)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Run the shell independently with full hot reload:
+
+```bash
+pnpm dev
 ```
+
+> **Note:** In standalone mode, navigating to `/login` will show a "Service unavailable" message since the auth remote isn't running. This is expected during shell-only development.
+
+### Integration Testing
+
+Run from the monorepo root to test with remotes:
+
+```bash
+pnpm preview:web
+```
+
+> **Important:** This is for **integration testing only**. The shell has HMR, but remote changes require rebuilding (restart the command). Use standalone mode for active development.
+
+### URLs
+
+| Mode | URL | Description |
+|------|-----|-------------|
+| Integrated | http://localhost:3000 | Full app with remotes |
+| Standalone | http://localhost:3000 | Shell only, remotes unavailable |
+
+## Module Federation Config
+
+The shell loads remotes defined in `vite.config.ts`:
+
+```typescript
+federation({
+  name: 'shell',
+  remotes: {
+    webAuth: 'http://localhost:3001/assets/remoteEntry.js',
+  },
+  shared: ['react', 'react-dom', 'react-router-dom'],
+})
+```
+
+## Loading Remote Components
+
+```typescript
+// Lazy load remote component
+const RemoteLogin = lazy(() => import('webAuth/LoginPage'));
+
+// Use with Suspense and ErrorBoundary
+<ErrorBoundary fallback={<RemoteUnavailable />}>
+  <Suspense fallback={<Loading />}>
+    <RemoteLogin />
+  </Suspense>
+</ErrorBoundary>
+```
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start dev server (standalone) |
+| `pnpm preview:mfe` | Start dev server (for integrated mode) |
+| `pnpm build` | Build for production |
+| `pnpm preview` | Preview production build |
+| `pnpm typecheck` | Run TypeScript checks |
+| `pnpm test` | Run unit tests |
+| `pnpm test:e2e` | Run Playwright E2E tests |
+
+## Adding New Remotes
+
+1. Add the remote URL in `vite.config.ts`:
+
+```typescript
+remotes: {
+  webAuth: 'http://localhost:3001/assets/remoteEntry.js',
+  webAccounts: 'http://localhost:3002/assets/remoteEntry.js', // new
+},
+```
+
+2. Add type declaration in `src/remotes.d.ts`:
+
+```typescript
+declare module 'webAccounts/DashboardPage' {
+  const DashboardPage: React.ComponentType;
+  export default DashboardPage;
+}
+```
+
+3. Import and use with lazy loading.

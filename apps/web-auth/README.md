@@ -1,75 +1,95 @@
-# React + TypeScript + Vite
+# Web Auth (Remote MFE)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Authentication microfrontend that exposes login and auth-related components.
 
-Currently, two official plugins are available:
+## Architecture
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This is a **remote** in a Module Federation setup. It exposes components that the shell (host) can load at runtime.
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+web-auth (remote)
+└── exposes ./LoginPage → consumed by web-shell
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Standalone Mode (Recommended for Development)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Run the auth app independently with full hot reload:
+
+```bash
+pnpm dev
 ```
+
+This starts a standard Vite dev server with HMR. Best for active development.
+
+### Integration Testing
+
+Run from the monorepo root to test with the shell:
+
+```bash
+pnpm preview:web
+```
+
+This builds web-auth and serves the `remoteEntry.js` file that the shell needs.
+
+> **Important:** This is for **integration testing only**. Preview mode has **no hot reload** - changes require rebuilding (restart the command).
+
+### URLs
+
+| Mode | URL | Description |
+|------|-----|-------------|
+| Integrated | http://localhost:3001 | Serves remoteEntry.js for shell |
+| Standalone | http://localhost:3001 | Full standalone app |
+
+## Module Federation Config
+
+Components exposed to other microfrontends in `vite.config.ts`:
+
+```typescript
+federation({
+  name: 'webAuth',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './LoginPage': './src/pages/LoginPage.tsx',
+  },
+  shared: ['react', 'react-dom', 'react-router-dom'],
+})
+```
+
+## Exposing New Components
+
+1. Create the component in `src/pages/` or `src/components/`
+
+2. Add to exposes in `vite.config.ts`:
+
+```typescript
+exposes: {
+  './LoginPage': './src/pages/LoginPage.tsx',
+  './ForgotPasswordPage': './src/pages/ForgotPasswordPage.tsx', // new
+},
+```
+
+3. Rebuild (`pnpm build`) for changes to be available to the shell
+
+4. Add type declaration in the shell's `src/remotes.d.ts`
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start dev server (standalone) |
+| `pnpm preview:mfe` | Build + preview (for integrated mode) |
+| `pnpm build` | Build for production |
+| `pnpm preview` | Serve production build |
+| `pnpm typecheck` | Run TypeScript checks |
+| `pnpm test` | Run unit tests |
+| `pnpm test:e2e` | Run Playwright E2E tests |
+
+## Important Notes
+
+1. **Build Required for Integration**: The shell consumes `remoteEntry.js` which is only generated during build. Use `pnpm preview:mfe` or `pnpm build && pnpm preview` for integration testing.
+
+2. **Shared Dependencies**: React, ReactDOM, and React Router are shared as singletons to avoid multiple instances.
+
+3. **Standalone Testing**: You can test components in isolation using `pnpm dev` without needing the shell.

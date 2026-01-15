@@ -6,11 +6,7 @@ import federation, { type Shared as FederationSharedDeps } from '@originjs/vite-
 export default defineConfig({
   plugins: [
     tailwindcss(),
-    react({
-      babel: {
-        plugins: [['babel-plugin-react-compiler']],
-      },
-    }),
+    react(),
     federation({
       name: 'webAuth',
       filename: 'remoteEntry.js',
@@ -34,6 +30,10 @@ export default defineConfig({
     cssCodeSplit: false,
   },
   server: {
+    port: 3001,
+    cors: true,
+  },
+  preview: {
     port: 3001,
     cors: true,
   },

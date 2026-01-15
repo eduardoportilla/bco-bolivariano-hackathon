@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "turbo dev",
+    "preview:web": "turbo preview:mfe --filter=web-shell --filter=web-auth",
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",

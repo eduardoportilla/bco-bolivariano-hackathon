@@ -1,9 +1,60 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, Component, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { Button } from '@repo/ui/components/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/Card';
 
 const RemoteLogin = lazy(() => import('webAuth/LoginPage'));
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class RemoteErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
+
+function RemoteUnavailable() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl text-destructive">Servicio no disponible</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center space-y-4">
+          <p className="text-muted-foreground">
+            El modulo de autenticacion no esta disponible en este momento.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Asegurate de que web-auth este corriendo en el puerto 3001.
+          </p>
+          <Link to="/">
+            <Button variant="outline">Volver al inicio</Button>
+          </Link>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 function HomePage() {
   return (
@@ -78,9 +129,11 @@ export function App() {
         <Route
           path="/login"
           element={
-            <Suspense fallback={<Loading />}>
-              <RemoteLogin />
-            </Suspense>
+            <RemoteErrorBoundary fallback={<RemoteUnavailable />}>
+              <Suspense fallback={<Loading />}>
+                <RemoteLogin />
+              </Suspense>
+            </RemoteErrorBoundary>
           }
         />
       </Routes>

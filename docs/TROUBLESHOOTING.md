@@ -80,3 +80,33 @@ pnpm ios
 - Despues de `pnpm add <libreria-nativa>`
 - Despues de actualizar version de libreria nativa
 - Error "Native module not found"
+
+---
+
+## Web Microfrontends
+
+### React Compiler + Module Federation Incompatibility
+
+**Issue:** When using React Compiler (`babel-plugin-react-compiler`) with Module Federation, remote components fail with:
+
+```
+TypeError: Cannot read properties of null (reading 'useMemoCache')
+```
+
+**Cause:** React Compiler generates code that uses internal React APIs (`useMemoCache`). When components are loaded via Module Federation, even with `singleton: true` sharing, the React internals aren't properly unified between host and remote.
+
+**Solution:** Do not use React Compiler in microfrontend apps. The performance benefits don't outweigh the compatibility issues with Module Federation.
+
+```typescript
+// vite.config.ts - Use simple react() without compiler
+react(),
+
+// NOT this:
+react({
+  babel: {
+    plugins: [['babel-plugin-react-compiler']],
+  },
+}),
+```
+
+**Status:** This is a known limitation. Future versions of React Compiler or Module Federation plugins may resolve this.
