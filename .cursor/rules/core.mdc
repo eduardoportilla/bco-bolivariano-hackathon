@@ -30,6 +30,41 @@ alwaysApply: true
 - No hardcoded secrets
 - Always write tests for new features
 
+## Code Quality
+
+### Clean Code Principles
+
+- Write self-documenting code with descriptive names
+- Keep functions small and focused (single responsibility)
+- Avoid deep nesting
+- Extract complex conditions into named variables or functions
+- DRY: Extract repeated logic into reusable functions/components
+
+### Maintainability
+
+- Prefer composition over inheritance
+- Use early returns to reduce nesting
+- Keep files under 500 lines (split if larger)
+- Group related code together
+- Add comments only for "why", not "what" (only when necessary)
+- Use constants for magic numbers and strings
+
+### Component Best Practices
+
+- One component per file
+- Props interface above component definition
+- Destructure props in function signature
+- Use custom hooks to extract complex logic
+- Memoize expensive computations (useMemo, useCallback)
+- Avoid prop drilling (use context or state management)
+
+### Error Handling
+
+- Always handle errors explicitly
+- Use try/catch for async operations
+- Provide meaningful error messages
+- Never swallow errors silently
+
 ## Package Structure
 
 | Package | Name | Purpose |
