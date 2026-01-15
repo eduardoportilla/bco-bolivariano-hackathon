@@ -19,7 +19,7 @@ export function createAccountsService(http: HttpClient): AccountsService {
   return {
     getAll: async () => {
       const response = await http.get<{ accounts: Account[] }>(API_ENDPOINTS.accounts.list);
-      return response.accounts;
+      return response?.accounts ?? [];
     },
 
     getById: (id: string) => {
@@ -42,7 +42,7 @@ export function createAccountsService(http: HttpClient): AccountsService {
       const url = `${API_ENDPOINTS.accounts.transactions(id)}${queryString ? `?${queryString}` : ''}`;
 
       const response = await http.get<{ transactions: Transaction[] }>(url);
-      return response.transactions;
+      return response?.transactions ?? [];
     },
   };
 }

@@ -11,3 +11,7 @@ pnpm-debug.log*
 
 # Turborepo
 .turbo
+
+# Build
+**/dist
+**/tsconfig.tsbuildinfo

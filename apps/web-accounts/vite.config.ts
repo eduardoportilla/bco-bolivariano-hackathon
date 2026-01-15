@@ -18,6 +18,7 @@ export default defineConfig({
         react: { singleton: true, requiredVersion: false },
         'react-dom': { singleton: true, requiredVersion: false },
         'react-router-dom': { singleton: true, requiredVersion: false },
+        '@tanstack/react-query': { singleton: true, requiredVersion: false },
       } as FederationSharedDeps,
     }),
   ],

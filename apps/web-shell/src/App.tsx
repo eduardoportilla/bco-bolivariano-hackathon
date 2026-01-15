@@ -1,7 +1,8 @@
-import { Suspense, lazy, Component, type ReactNode } from 'react';
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { Button } from '@repo/ui/components/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/Card';
+import { RemoteErrorBoundary } from '@repo/ui/components/ErrorBoundary';
 import {
   LoginPage,
   ForgotPasswordPage,
@@ -10,70 +11,6 @@ import {
 
 // Lazy load microfrontend apps
 const AccountsApp = lazy(() => import('webAccounts/App'));
-
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback: ReactNode;
-}
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-}
-
-/**
- * Error boundary for handling remote microfrontend failures.
- */
-class RemoteErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(): ErrorBoundaryState {
-    return { hasError: true };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback;
-    }
-
-    return this.props.children;
-  }
-}
-
-interface RemoteUnavailableProps {
-  name: string;
-  port?: number;
-}
-
-/**
- * Fallback component when a remote microfrontend is unavailable.
- */
-function RemoteUnavailable({ name, port = 3001 }: RemoteUnavailableProps) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl text-destructive">
-            Servicio no disponible
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-muted-foreground">
-            El modulo de {name} no esta disponible en este momento.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Asegurate de que el servicio este corriendo en el puerto {port}.
-          </p>
-          <Link to="/">
-            <Button variant="outline">Volver al inicio</Button>
-          </Link>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
 
 /**
  * Home page component.
@@ -170,9 +107,7 @@ export function App() {
         <Route
           path="/accounts/*"
           element={
-            <RemoteErrorBoundary
-              fallback={<RemoteUnavailable name="Cuentas" port={3001} />}
-            >
+            <RemoteErrorBoundary name="Cuentas" port={3001}>
               <Suspense fallback={<Loading />}>
                 <AccountsApp />
               </Suspense>

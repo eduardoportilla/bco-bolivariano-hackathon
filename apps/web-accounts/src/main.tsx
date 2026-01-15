@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ErrorBoundary } from '@repo/ui/components/ErrorBoundary';
 import { App } from './App';
 import './index.css';
 
@@ -21,15 +22,18 @@ if (!rootElement) {
 
 /**
  * Standalone entry point for the accounts microfrontend.
- * Uses BrowserRouter for standalone development.
- * When integrated via Module Federation, the shell provides the router.
+ * Uses BrowserRouter for standalone development (no basename - works at root).
+ * When integrated via Module Federation, the shell provides the router
+ * and mounts this at /accounts/*.
  */
 createRoot(rootElement).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename="/accounts">
-        <App />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>
 );
