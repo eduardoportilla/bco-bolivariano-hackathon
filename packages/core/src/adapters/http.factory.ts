@@ -76,8 +76,8 @@ function createAxiosInstance(
 ): AxiosInstance {
   const mergedConfig: AxiosRequestConfig = {
     baseURL: config.baseURL,
-    timeout: config.timeout ?? DEFAULT_CONFIG.timeout,
-    withCredentials: config.withCredentials ?? DEFAULT_CONFIG.withCredentials,
+    timeout: config.timeout ?? DEFAULT_CONFIG.timeout ?? 30000,
+    withCredentials: config.withCredentials ?? DEFAULT_CONFIG.withCredentials ?? false,
     headers: {
       ...DEFAULT_CONFIG.headers,
       ...config.headers,

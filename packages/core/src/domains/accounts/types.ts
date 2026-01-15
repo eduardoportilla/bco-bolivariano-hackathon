@@ -63,9 +63,9 @@ export interface AccountFilters {
  * Transaction filters for listing.
  */
 export interface TransactionFilters {
-  startDate?: string;
-  endDate?: string;
-  type?: TransactionType;
-  limit?: number;
-  offset?: number;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+  type?: TransactionType | undefined;
+  limit?: number | undefined;
+  offset?: number | undefined;
 }
