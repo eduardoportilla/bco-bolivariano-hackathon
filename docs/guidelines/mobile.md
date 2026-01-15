@@ -261,9 +261,16 @@ Add the Babel plugin (must be last in plugins array):
 
 ```javascript
 // babel.config.js
+/** @type {import('react-native-worklets/plugin').PluginOptions} */
+const workletsPluginOptions = {
+  // Your custom options.
+}
+
 module.exports = {
   presets: ['module:@react-native/babel-preset'],
-  plugins: ['react-native-reanimated/plugin'],
+  plugins: [
+    ['react-native-worklets/plugin', workletsPluginOptions],
+  ],
 };
 ```
 
