@@ -42,7 +42,7 @@ fix(mobile): corregir validacion de transferencia
 refactor(ui-web): optimizar componente Card
 ```
 
-Scopes: `web-shell`, `web-auth`, `mobile`, `ui` (for ui-web package)
+Scopes match folder names: `core`, `ui`, `web-shell`, `web-auth`, `mobile`
 
 ### 5. PR
 
@@ -76,6 +76,7 @@ Auto-applied from `.cursor/rules/`:
 | `web.mdc` | Editing web files |
 | `mobile.mdc` | Editing mobile files |
 | `services.mdc` | Creating services/API calls |
+| `hooks.mdc` | Creating React Query hooks |
 | `testing.mdc` | Writing tests |
 | `architecture.mdc` | Creating features |
 

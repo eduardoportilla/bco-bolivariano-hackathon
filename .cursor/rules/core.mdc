@@ -5,12 +5,15 @@ alwaysApply: true
 
 # Core Standards
 
+> **Rules vs Guidelines:** This file contains concise rules for quick reference. See `docs/guidelines/` for detailed documentation with examples.
+
 ## Tech Stack
 
 - Web: React 19, TypeScript, Vite, TailwindCSS 4.1, shadcn/ui
 - Mobile: React Native CLI, TypeScript
 - Forms: react-hook-form + zod (v4 API)
 - State: Zustand (client), React Query (server)
+- Dates: date-fns (use for date manipulation and formatting)
 - Monorepo: pnpm, Turborepo
 
 ## Documentation and Patterns
@@ -29,6 +32,8 @@ alwaysApply: true
 - No console.log (use logger from shared/utils)
 - No hardcoded secrets
 - Always write tests for new features
+- Prefer async/await over .then() chains
+- Use Error Boundaries for React error handling
 
 ## Code Quality
 
@@ -47,7 +52,15 @@ alwaysApply: true
 - Keep files under 500 lines (split if larger)
 - Group related code together
 - Add comments only for "why", not "what" (only when necessary)
-- Use constants for magic numbers and strings
+- Use constants for magic numbers and strings (SCREAMING_SNAKE_CASE)
+
+### TypeScript Patterns
+
+- Use `interface` for object shapes
+- Use `type` for unions, primitives, and utility types
+- Explicit return types on exported functions
+- Use `unknown` instead of `any` when type is uncertain
+- Naming: PascalCase for types/interfaces, camelCase for variables/functions, SCREAMING_SNAKE_CASE for constants
 
 ### Component Best Practices
 
@@ -57,6 +70,15 @@ alwaysApply: true
 - Use custom hooks to extract complex logic
 - Memoize expensive computations (useMemo, useCallback)
 - Avoid prop drilling (use context or state management)
+- Include accessibility attributes (aria-label, role, etc.)
+
+### File Naming
+
+- Components: `PascalCase.tsx` (e.g., `LoginForm.tsx`)
+- Hooks: `camelCase.ts` (e.g., `useAuth.ts`)
+- Utilities: `camelCase.ts` (e.g., `formatters.ts`)
+- Types: `*.types.ts` (e.g., `auth.types.ts`)
+- Tests: `*.test.ts` or `*.test.tsx`
 
 ### Error Handling
 
@@ -73,6 +95,13 @@ alwaysApply: true
 | packages/ui-web | @repo/ui | Web design system |
 | packages/eslint-config | @repo/eslint-config | Shared linting |
 | packages/typescript-config | @repo/typescript-config | TS configs |
+
+## Environment Variables
+
+- Web: Use `VITE_` prefix (e.g., `VITE_API_URL`)
+- Mobile: Use `react-native-config` (no prefix, e.g., `API_URL`)
+- Use `.env.example` as template (we never commit `.env` files)
+- Access via `import.meta.env` (web) or `Config` (mobile)
 
 ## Commands
 
@@ -105,5 +134,15 @@ Scopes match folder names: core, ui, web-shell, web-auth, mobile
 
 ## References
 
-- `docs/guidelines/coding.md` - Code patterns
-- `docs/guidelines/services.md` - Service/config patterns
+Detailed documentation in `docs/guidelines/`:
+
+| Guideline | Content |
+|-----------|---------|
+| `coding.md` | TypeScript, imports, patterns |
+| `components.md` | Component structure, props |
+| `architecture.md` | Feature organization, core package |
+| `services.md` | API, forms, state, error handling |
+| `security.md` | OWASP, tokens, validation |
+| `styling.md` | TailwindCSS, shadcn/ui |
+| `mobile.md` | React Native patterns |
+| `testing.md` | Vitest, Jest, Playwright |
