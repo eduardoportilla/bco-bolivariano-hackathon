@@ -74,11 +74,17 @@ export const accountService = {
 - react-hook-form for all forms
 - zod (v4 API) for validation
 
+## Animations (Reanimated)
+
+- Use `react-native-reanimated` for performant animations
+- Babel plugin must be last in plugins array
+
 ## Performance
 
 - FlatList for lists (never ScrollView + map)
 - useCallback, useMemo, React.memo
 - Profile with Flipper
+- Reanimated runs on UI thread (60fps)
 
 ## Security
 

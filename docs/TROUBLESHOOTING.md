@@ -36,3 +36,47 @@ pnpm install
 cd apps/mobile/ios && pod install && cd ../../..
 pnpm dev
 ```
+
+---
+
+## Native Rebuild (Mobile)
+
+Rebuild nativo necesario despues de instalar librerias con codigo nativo (ej: react-native-reanimated).
+
+### Android
+
+```bash
+cd apps/mobile/android
+./gradlew clean        # macOS/Linux
+.\gradlew.bat clean    # Windows
+cd ..
+pnpm android
+```
+
+### iOS (macOS only)
+
+```bash
+cd apps/mobile/ios
+pod install
+cd ..
+pnpm ios
+```
+
+### Full Clean + Rebuild
+
+```bash
+cd apps/mobile
+
+# Android
+cd android && ./gradlew clean && cd ..
+pnpm android
+
+# iOS
+cd ios && pod deintegrate && pod install && cd ..
+pnpm ios
+```
+
+**Cuando hacer rebuild:**
+- Despues de `pnpm add <libreria-nativa>`
+- Despues de actualizar version de libreria nativa
+- Error "Native module not found"

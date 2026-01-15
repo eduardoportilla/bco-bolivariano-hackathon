@@ -10,6 +10,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Input, Card } from '../../components/ui';
 import { colors, spacing, typography } from '../../constants';
+import { User } from '../../components/icons';
+
+// EJEMPLO REANIMATED: Descomentar despues de rebuild nativo
+import { AnimatedExample } from '../../components/ui/AnimatedExample';
 
 interface LoginFormData {
   username: string;
@@ -22,6 +26,7 @@ export function LoginScreen() {
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showExample, setShowExample] = useState(true);
 
   async function handleLogin() {
     setIsLoading(true);
@@ -40,7 +45,15 @@ export function LoginScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
+          {/* EJEMPLO REANIMATED: Descomentar despues de rebuild nativo */}
+          showExample && (
+            <AnimatedExample onRemove={() => setShowExample(false)} />
+          )
+
           <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <User size={48} color={colors.primary} />
+            </View>
             <Text style={styles.title}>Bienvenido</Text>
             <Text style={styles.subtitle}>
               Ingresa tus credenciales para acceder
@@ -105,6 +118,15 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: spacing.xl,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.md,
   },
   title: {
     fontSize: typography.sizes.xxl,

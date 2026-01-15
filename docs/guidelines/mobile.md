@@ -245,6 +245,163 @@ export {
 
 ---
 
+## Animations (React Native Reanimated)
+
+Use `react-native-reanimated` for performant, 60fps animations that run on the UI thread.
+
+### Setup
+
+Reanimated requires `react-native-worklets` as a peer dependency:
+
+```bash
+pnpm add react-native-reanimated react-native-worklets --filter mobile
+```
+
+Add the Babel plugin (must be last in plugins array):
+
+```javascript
+// babel.config.js
+module.exports = {
+  presets: ['module:@react-native/babel-preset'],
+  plugins: ['react-native-reanimated/plugin'],
+};
+```
+
+### Core Concepts
+
+```typescript
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withDelay,
+  Easing,
+} from 'react-native-reanimated';
+```
+
+**Shared Values** - Reactive values that trigger animations:
+
+```typescript
+const opacity = useSharedValue(0);
+const scale = useSharedValue(1);
+
+// Update triggers animation
+opacity.value = withTiming(1, { duration: 300 });
+scale.value = withSpring(1.2, { damping: 10, stiffness: 100 });
+```
+
+**Animated Styles** - Styles that react to shared values:
+
+```typescript
+const animatedStyle = useAnimatedStyle(() => ({
+  opacity: opacity.value,
+  transform: [{ scale: scale.value }],
+}));
+```
+
+**Animated Components** - Use Animated.View, Animated.Text, etc.:
+
+```tsx
+<Animated.View style={[styles.container, animatedStyle]}>
+  {children}
+</Animated.View>
+```
+
+### Common Animation Patterns
+
+**Fade In on Mount:**
+
+```typescript
+useEffect(() => {
+  opacity.value = withTiming(1, { duration: 500 });
+}, [opacity]);
+```
+
+**Spring Animation:**
+
+```typescript
+scale.value = withSpring(1, { 
+  damping: 12,      // Lower = more bouncy
+  stiffness: 100,   // Higher = faster
+});
+```
+
+**Delayed Animation:**
+
+```typescript
+opacity.value = withDelay(
+  300, // delay in ms
+  withTiming(1, { duration: 500 })
+);
+```
+
+**Sequenced Animations:**
+
+```typescript
+useEffect(() => {
+  // Icon springs in first
+  iconScale.value = withSpring(1);
+  
+  // Header fades in after 200ms
+  headerOpacity.value = withDelay(200, withTiming(1));
+  
+  // Card slides up after 400ms
+  cardTranslateY.value = withDelay(400, withSpring(0));
+}, []);
+```
+
+### Example: Animated Container
+
+```typescript
+import { useEffect } from 'react';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  Easing,
+} from 'react-native-reanimated';
+
+interface FadeInViewProps {
+  children: React.ReactNode;
+  delay?: number;
+}
+
+export function FadeInView({ children, delay = 0 }: FadeInViewProps) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(20);
+
+  useEffect(() => {
+    opacity.value = withDelay(
+      delay,
+      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) })
+    );
+    translateY.value = withDelay(
+      delay,
+      withSpring(0, { damping: 15 })
+    );
+  }, [delay, opacity, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return <Animated.View style={animatedStyle}>{children}</Animated.View>;
+}
+```
+
+### Best Practices
+
+1. **Run on UI thread** - useAnimatedStyle callbacks run on UI thread, avoid JS-only operations
+2. **Avoid inline shared values** - Create shared values at component level, not in render
+3. **Use worklets for complex logic** - Mark functions with `'worklet'` directive
+4. **Clean up animations** - Cancel running animations when component unmounts
+5. **Profile performance** - Use Flipper to verify 60fps
+
+---
+
 ## Performance Rules
 
 1. Use `FlatList` for lists, never `ScrollView` + `map`
