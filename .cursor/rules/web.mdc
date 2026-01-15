@@ -14,6 +14,21 @@ globs:
 - No inline styles
 - Design tokens from @repo/ui package
 
+## Icons
+
+- Import icons ONLY from `@repo/ui/components/icons`
+- NEVER import directly from `lucide-react`
+- Use `Icon` wrapper from `@repo/ui/components/Icon` for consistent defaults
+- To add new icons, update `packages/ui-web/src/components/icons.ts`
+
+```typescript
+// Good
+import { User, Settings } from '@repo/ui/components/icons';
+
+// Bad - never do this
+import { User } from 'lucide-react';
+```
+
 ## Forms
 
 - react-hook-form for all forms

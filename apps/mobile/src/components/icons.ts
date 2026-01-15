@@ -1,7 +1,7 @@
 /**
  * Curated icon set for design consistency.
  * Add new icons here as needed - this ensures a controlled icon palette.
- * All icons re-exported from lucide-react.
+ * All icons re-exported from lucide-react-native.
  */
 export {
   // Navigation
@@ -42,4 +42,4 @@ export {
 
   // Re-export the type for custom usage
   type LucideIcon,
-} from "lucide-react";
+} from "lucide-react-native";

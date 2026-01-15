@@ -218,6 +218,51 @@ features/transfers/
 
 ---
 
+## Icons
+
+### Web
+
+Import icons from the curated set in `@repo/ui/components/icons`:
+
+```typescript
+// Good: Import from curated set
+import { User, Settings, ChevronRight } from '@repo/ui/components/icons';
+
+// Bad: Import directly from lucide-react
+import { User } from 'lucide-react'; // DON'T do this
+```
+
+Use the `Icon` wrapper component for consistent defaults:
+
+```tsx
+import { Icon } from '@repo/ui/components/Icon';
+import { User } from '@repo/ui/components/icons';
+
+// With wrapper (recommended for consistency)
+<Icon icon={User} size={20} className="text-muted-foreground" />
+
+// Direct usage (also valid)
+<User size={20} className="text-muted-foreground" />
+```
+
+To add a new icon, update `packages/ui-web/src/components/icons.ts`.
+
+### Mobile
+
+Import icons from the curated set in `@/components/icons`:
+
+```typescript
+// Good: Import from curated set
+import { User, Settings } from '@/components/icons';
+
+// Bad: Import directly from lucide-react-native
+import { User } from 'lucide-react-native'; // DON'T do this
+```
+
+To add a new icon, update `apps/mobile/src/components/icons.ts`.
+
+---
+
 ## Forbidden Patterns
 
 ```tsx

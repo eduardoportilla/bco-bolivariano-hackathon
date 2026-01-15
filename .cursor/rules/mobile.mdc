@@ -35,6 +35,20 @@ apps/mobile/src/
 - No NativeWind or Tailwind
 - Design tokens from @/constants
 
+## Icons
+
+- Import icons ONLY from `@/components/icons`
+- NEVER import directly from `lucide-react-native`
+- To add new icons, update `apps/mobile/src/components/icons.ts`
+
+```typescript
+// Good
+import { User, Settings } from '@/components/icons';
+
+// Bad - never do this
+import { User } from 'lucide-react-native';
+```
+
 ## Services
 
 ```typescript

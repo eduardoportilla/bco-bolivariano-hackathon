@@ -220,6 +220,31 @@ const styles = StyleSheet.create({
 
 ---
 
+## Icons
+
+Import icons from the curated set to maintain design consistency:
+
+```typescript
+// Good: Import from curated set
+import { User, Settings, ChevronRight } from '@/components/icons';
+
+// Bad: Import directly from lucide-react-native
+import { User } from 'lucide-react-native'; // DON'T do this
+```
+
+To add a new icon, update `apps/mobile/src/components/icons.ts`:
+
+```typescript
+// apps/mobile/src/components/icons.ts
+export {
+  // Add new icons here
+  NewIcon,
+  // ... existing icons
+} from 'lucide-react-native';
+```
+
+---
+
 ## Performance Rules
 
 1. Use `FlatList` for lists, never `ScrollView` + `map`
