@@ -87,8 +87,9 @@ bbh/
 ├── apps/
 │   ├── web-shell/      # Host microfrontend
 │   ├── web-auth/       # Authentication microfrontend
-│   └── mobile/         # React Native app (components colocated)
+│   └── mobile/         # React Native app
 ├── packages/
+│   ├── core/           # Shared business logic (@repo/core)
 │   └── ui-web/         # Web design system (@repo/ui)
 ├── docs/
 │   └── guidelines/     # Development guidelines

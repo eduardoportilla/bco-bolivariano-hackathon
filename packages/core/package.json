@@ -1,0 +1,34 @@
+{
+  "name": "@repo/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage"
+  },
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.0",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "exports": {
+    "./adapters": "./src/adapters/index.ts",
+    "./domains/auth": "./src/domains/auth/index.ts",
+    "./domains/accounts": "./src/domains/accounts/index.ts",
+    "./domains/transfers": "./src/domains/transfers/index.ts",
+    "./shared": "./src/shared/index.ts",
+    "./shared/utils": "./src/shared/utils/index.ts",
+    "./shared/constants": "./src/shared/constants/index.ts"
+  }
+}
