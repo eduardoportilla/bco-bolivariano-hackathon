@@ -69,6 +69,7 @@ alwaysApply: true
 
 | Package | Name | Purpose |
 |---------|------|---------|
+| packages/core | @repo/core | Shared business logic |
 | packages/ui-web | @repo/ui | Web design system |
 | packages/eslint-config | @repo/eslint-config | Shared linting |
 | packages/typescript-config | @repo/typescript-config | TS configs |
@@ -100,7 +101,7 @@ fix(mobile): corregir navegacion en dashboard
 refactor(ui): simplificar componente Button
 ```
 
-Scopes: web-shell, web-auth, mobile, ui (for ui-web package)
+Scopes match folder names: core, ui, web-shell, web-auth, mobile
 
 ## References
 
