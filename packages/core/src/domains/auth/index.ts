@@ -11,10 +11,17 @@ export type {
 export {
   loginSchema,
   registerSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   userSchema,
   authResponseSchema,
 } from './schema';
-export type { LoginFormData, RegisterFormData } from './schema';
+export type {
+  LoginFormData,
+  RegisterFormData,
+  ForgotPasswordFormData,
+  ResetPasswordFormData,
+} from './schema';
 
 // Service
 export type { AuthService } from './service';

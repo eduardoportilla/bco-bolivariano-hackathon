@@ -6,6 +6,8 @@ Standards for API services, configuration, forms, state management, and error ha
 
 ## API Client
 
+> **Important:** Always use Axios for HTTP requests. Do not use the native `fetch` API. Axios provides better defaults, interceptors for auth/error handling, automatic JSON transformation, and cleaner error objects.
+
 ### Web (Axios + React Query)
 
 ```typescript

@@ -4,6 +4,12 @@ description: Service, API, and state patterns
 
 # Services and State
 
+## HTTP Client
+
+- Use Axios for all HTTP requests (never use fetch directly)
+- Axios provides better error handling, interceptors, and request/response transformation
+- See `docs/guidelines/services.md` for client configuration patterns
+
 ## Core Package Services
 
 Services live in `@repo/core` and use the adapter pattern:

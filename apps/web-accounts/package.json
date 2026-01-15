@@ -1,5 +1,5 @@
 {
-  "name": "web-auth",
+  "name": "web-accounts",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -22,6 +22,7 @@
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.90.17",
+    "axios": "^1.13.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.6.1"

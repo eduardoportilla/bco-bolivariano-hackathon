@@ -1,21 +1,29 @@
-# Web Auth (Remote MFE)
+# Web Accounts (Remote MFE)
 
-Authentication microfrontend that exposes login and auth-related components.
+Accounts microfrontend that exposes account-related pages and components.
 
 ## Architecture
 
-This is a **remote** in a Module Federation setup. It exposes components that the shell (host) can load at runtime.
+This is a **remote** in a Module Federation setup. It exposes an App component with internal routing that the shell (host) loads at runtime.
 
 ```
-web-auth (remote)
-└── exposes ./LoginPage → consumed by web-shell
+web-accounts (remote)
+└── exposes ./App → consumed by web-shell at /accounts/*
 ```
+
+### Routing Strategy
+
+The shell mounts this microfrontend at `/accounts/*` with a wildcard route. This app handles its own internal routing:
+
+- `/accounts` - Accounts list page
+- `/accounts/:id` - Account details page
+- `/accounts/:id/movements` - Account movements history
 
 ## Development
 
 ### Standalone Mode (Recommended for Development)
 
-Run the auth app independently with full hot reload:
+Run the accounts app independently with full hot reload:
 
 ```bash
 pnpm dev
@@ -31,7 +39,7 @@ Run from the monorepo root to test with the shell:
 pnpm preview:web
 ```
 
-This builds web-auth and serves the `remoteEntry.js` file that the shell needs.
+This builds web-accounts and serves the `remoteEntry.js` file that the shell needs.
 
 > **Important:** This is for **integration testing only**. Preview mode has **no hot reload** - changes require rebuilding (restart the command).
 
@@ -48,31 +56,14 @@ Components exposed to other microfrontends in `vite.config.ts`:
 
 ```typescript
 federation({
-  name: 'webAuth',
+  name: 'webAccounts',
   filename: 'remoteEntry.js',
   exposes: {
-    './LoginPage': './src/pages/LoginPage.tsx',
+    './App': './src/App.tsx',
   },
   shared: ['react', 'react-dom', 'react-router-dom'],
 })
 ```
-
-## Exposing New Components
-
-1. Create the component in `src/pages/` or `src/components/`
-
-2. Add to exposes in `vite.config.ts`:
-
-```typescript
-exposes: {
-  './LoginPage': './src/pages/LoginPage.tsx',
-  './ForgotPasswordPage': './src/pages/ForgotPasswordPage.tsx', // new
-},
-```
-
-3. Rebuild (`pnpm build`) for changes to be available to the shell
-
-4. Add type declaration in the shell's `src/remotes.d.ts`
 
 ## Scripts
 
@@ -92,4 +83,6 @@ exposes: {
 
 2. **Shared Dependencies**: React, ReactDOM, and React Router are shared as singletons to avoid multiple instances.
 
-3. **Standalone Testing**: You can test components in isolation using `pnpm dev` without needing the shell.
+3. **Internal Routing**: This microfrontend uses `Routes` (not `BrowserRouter`) since the shell provides the router context.
+
+4. **Standalone Testing**: You can test components in isolation using `pnpm dev` without needing the shell.

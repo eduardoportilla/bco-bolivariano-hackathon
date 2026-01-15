@@ -11,6 +11,7 @@ alwaysApply: true
 
 - Web: React 19, TypeScript, Vite, TailwindCSS 4.1, shadcn/ui
 - Mobile: React Native CLI, TypeScript
+- HTTP: Axios (use instead of fetch)
 - Forms: react-hook-form + zod (v4 API)
 - State: Zustand (client), React Query (server)
 - Dates: date-fns (use for date manipulation and formatting)
@@ -125,12 +126,12 @@ alwaysApply: true
 Conventional commits in Spanish:
 
 ```
-feat(web-auth): agregar validacion de email
+feat(web-accounts): agregar vista de movimientos
 fix(mobile): corregir navegacion en dashboard
 refactor(ui): simplificar componente Button
 ```
 
-Scopes match folder names: core, ui, web-shell, web-auth, mobile
+Scopes match folder names: core, ui, web-shell, web-accounts, mobile
 
 ## References
 

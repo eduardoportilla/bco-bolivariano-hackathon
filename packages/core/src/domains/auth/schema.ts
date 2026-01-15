@@ -32,6 +32,35 @@ export const registerSchema = z.object({
 export type RegisterFormData = z.infer<typeof registerSchema>;
 
 /**
+ * Forgot password form validation schema.
+ */
+export const forgotPasswordSchema = z.object({
+  identification: z.string().min(1, 'Identificacion requerida'),
+});
+
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+
+/**
+ * Reset password form validation schema.
+ */
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, 'Minimo 8 caracteres')
+      .regex(/[A-Z]/, 'Al menos una mayuscula')
+      .regex(/[a-z]/, 'Al menos una minuscula')
+      .regex(/[0-9]/, 'Al menos un numero'),
+    confirmPassword: z.string().min(1, 'Confirme su contrasena'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Las contrasenas no coinciden',
+    path: ['confirmPassword'],
+  });
+
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+
+/**
  * User response validation schema.
  */
 export const userSchema = z.object({

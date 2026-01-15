@@ -8,10 +8,10 @@ export default defineConfig({
     tailwindcss(),
     react(),
     federation({
-      name: 'webAuth',
+      name: 'webAccounts',
       filename: 'remoteEntry.js',
       exposes: {
-        './LoginPage': './src/pages/LoginPage.tsx',
+        './App': './src/App.tsx',
       },
       shared: {
         react: { singleton: true, requiredVersion: false },

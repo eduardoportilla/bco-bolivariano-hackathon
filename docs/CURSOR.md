@@ -37,12 +37,12 @@ Run `/review` before committing.
 Use conventional commits in Spanish:
 
 ```
-feat(web-auth): agregar login con biometricos
+feat(web-accounts): agregar vista de movimientos
 fix(mobile): corregir validacion de transferencia
 refactor(ui-web): optimizar componente Card
 ```
 
-Scopes match folder names: `core`, `ui`, `web-shell`, `web-auth`, `mobile`
+Scopes match folder names: `core`, `ui`, `web-shell`, `web-accounts`, `mobile`
 
 ### 5. PR
 

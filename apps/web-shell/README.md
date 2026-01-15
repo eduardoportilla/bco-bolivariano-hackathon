@@ -1,6 +1,6 @@
 # Web Shell (Host MFE)
 
-The main container application that orchestrates all web microfrontends.
+The main container application that orchestrates all web microfrontends and owns authentication routes.
 
 ## Architecture
 
@@ -8,8 +8,16 @@ This is the **host** in a Module Federation setup. It loads remote modules from 
 
 ```
 web-shell (host)
-└── loads webAuth/LoginPage from web-auth (remote)
+├── owns auth routes (/login, /forgot-password, /reset-password)
+└── loads webAccounts/App from web-accounts at /accounts/*
 ```
+
+### Routing Strategy (Hybrid Approach)
+
+- **Shell owns:** Top-level routing, auth routes (cross-cutting concern), browser history
+- **Microfrontends own:** Internal routing within their domain prefix
+
+Auth is not a separate microfrontend because it's infrastructure, not a business domain.
 
 ## Development
 
@@ -21,7 +29,7 @@ Run the shell independently with full hot reload:
 pnpm dev
 ```
 
-> **Note:** In standalone mode, navigating to `/login` will show a "Service unavailable" message since the auth remote isn't running. This is expected during shell-only development.
+> **Note:** In standalone mode, navigating to `/accounts` will show a "Service unavailable" message since the accounts remote isn't running. Auth routes work in standalone mode.
 
 ### Integration Testing
 
@@ -48,25 +56,32 @@ The shell loads remotes defined in `vite.config.ts`:
 federation({
   name: 'shell',
   remotes: {
-    webAuth: 'http://localhost:3001/assets/remoteEntry.js',
+    webAccounts: 'http://localhost:3001/assets/remoteEntry.js',
   },
   shared: ['react', 'react-dom', 'react-router-dom'],
 })
 ```
 
-## Loading Remote Components
+## Loading Remote Microfrontends
 
 ```typescript
-// Lazy load remote component
-const RemoteLogin = lazy(() => import('webAuth/LoginPage'));
+// Lazy load remote microfrontend
+const AccountsApp = lazy(() => import('webAccounts/App'));
 
 // Use with Suspense and ErrorBoundary
-<ErrorBoundary fallback={<RemoteUnavailable />}>
-  <Suspense fallback={<Loading />}>
-    <RemoteLogin />
-  </Suspense>
-</ErrorBoundary>
+<Route
+  path="/accounts/*"
+  element={
+    <RemoteErrorBoundary fallback={<RemoteUnavailable name="Cuentas" />}>
+      <Suspense fallback={<Loading />}>
+        <AccountsApp />
+      </Suspense>
+    </RemoteErrorBoundary>
+  }
+/>
 ```
+
+The `/*` wildcard allows the microfrontend to handle its own internal routes.
 
 ## Scripts
 
@@ -86,18 +101,18 @@ const RemoteLogin = lazy(() => import('webAuth/LoginPage'));
 
 ```typescript
 remotes: {
-  webAuth: 'http://localhost:3001/assets/remoteEntry.js',
-  webAccounts: 'http://localhost:3002/assets/remoteEntry.js', // new
+  webAccounts: 'http://localhost:3001/assets/remoteEntry.js',
+  webTransfers: 'http://localhost:3002/assets/remoteEntry.js', // new
 },
 ```
 
 2. Add type declaration in `src/remotes.d.ts`:
 
 ```typescript
-declare module 'webAccounts/DashboardPage' {
-  const DashboardPage: React.ComponentType;
-  export default DashboardPage;
+declare module 'webTransfers/App' {
+  const App: React.ComponentType;
+  export default App;
 }
 ```
 
-3. Import and use with lazy loading.
+3. Add route with wildcard and lazy loading in `App.tsx`.

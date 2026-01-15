@@ -5,8 +5,8 @@
 ```
 bbh/
 ├── apps/
-│   ├── web-shell/         # Host MFE (container)
-│   ├── web-auth/          # Auth MFE (remote)
+│   ├── web-shell/         # Host MFE (owns auth routes)
+│   ├── web-accounts/      # Accounts MFE (remote)
 │   └── mobile/            # React Native app
 ├── packages/
 │   ├── core/              # Shared business logic (@repo/core)
@@ -306,40 +306,71 @@ src/hooks/
 
 ## Microfrontends (Module Federation)
 
+### Routing Strategy (Hybrid Approach)
+
+- **Shell owns:** Top-level routing, auth routes (cross-cutting concern), browser history
+- **Microfrontends own:** Internal routing within their domain prefix
+
+Auth is not a separate microfrontend because it's infrastructure, not a business domain.
+
 ### Shell (Host)
 ```typescript
 // apps/web-shell/vite.config.ts
 federation({
   name: 'shell',
   remotes: {
-    webAuth: 'http://localhost:3001/assets/remoteEntry.js',
+    webAccounts: 'http://localhost:3001/assets/remoteEntry.js',
   },
   shared: ['react', 'react-dom', 'react-router-dom', 'zustand'],
 })
 ```
 
-### Remote
+### Remote (with internal routing)
 ```typescript
-// apps/web-auth/vite.config.ts
+// apps/web-accounts/vite.config.ts
 federation({
-  name: 'webAuth',
+  name: 'webAccounts',
   filename: 'remoteEntry.js',
   exposes: {
-    './LoginPage': './src/pages/LoginPage.tsx',
+    './App': './src/App.tsx',  // Exposes App with internal router
   },
   shared: ['react', 'react-dom', 'react-router-dom', 'zustand'],
 })
+
+// apps/web-accounts/src/App.tsx
+// Uses Routes (not BrowserRouter) since shell provides the router
+export function App() {
+  return (
+    <Routes>
+      <Route index element={<AccountsListPage />} />
+      <Route path=":id" element={<AccountDetailsPage />} />
+    </Routes>
+  );
+}
 ```
 
 ### Loading Remotes
 ```typescript
-const LoginPage = React.lazy(() => import('webAuth/LoginPage'));
+const AccountsApp = React.lazy(() => import('webAccounts/App'));
 
 function App() {
   return (
-    <Suspense fallback={<Loading />}>
-      <LoginPage />
-    </Suspense>
+    <Routes>
+      {/* Auth routes owned by shell */}
+      <Route path="/login" element={<LoginPage />} />
+      
+      {/* Microfrontend with wildcard for internal routing */}
+      <Route
+        path="/accounts/*"
+        element={
+          <ErrorBoundary fallback={<RemoteUnavailable />}>
+            <Suspense fallback={<Loading />}>
+              <AccountsApp />
+            </Suspense>
+          </ErrorBoundary>
+        }
+      />
+    </Routes>
   );
 }
 ```

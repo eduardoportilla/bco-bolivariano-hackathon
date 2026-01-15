@@ -36,29 +36,29 @@ pnpm exec playwright install
 For active development with hot reload, run each microfrontend independently:
 
 ```bash
-# Shell only (without auth integration)
+# Shell only (includes auth pages)
 pnpm dev --filter web-shell
 
-# Auth only (standalone login page)
-pnpm dev --filter web-auth
+# Accounts only (standalone accounts pages)
+pnpm dev --filter web-accounts
 ```
 
 This is the recommended approach for day-to-day development. Each app has full HMR support.
 
 ### Web Microfrontends (Integration Testing)
 
-To test both microfrontends integrated (shell + auth):
+To test both microfrontends integrated (shell + accounts):
 
 ```bash
 pnpm preview:web
 ```
 
-This builds `web-auth` and serves it in preview mode, then runs `web-shell` in dev mode.
+This builds `web-accounts` and serves it in preview mode, then runs `web-shell` in dev mode.
 
 - Shell: http://localhost:3000 (dev mode with HMR)
-- Auth remote: http://localhost:3001 (preview mode, **no HMR**)
+- Accounts remote: http://localhost:3001 (preview mode, **no HMR**)
 
-> **Important:** This is for **integration testing only**, not active development. Changes to web-auth require rebuilding (restart the command). Use standalone mode for development with hot reload.
+> **Important:** This is for **integration testing only**, not active development. Changes to web-accounts require rebuilding (restart the command). Use standalone mode for development with hot reload.
 
 > **Why preview?** Module Federation requires remotes to be built. The `remoteEntry.js` file is only generated during build, not in pure dev mode.
 
@@ -116,8 +116,8 @@ pnpm build --filter web-shell
 ```
 bbh/
 ├── apps/
-│   ├── web-shell/      # Host microfrontend
-│   ├── web-auth/       # Authentication microfrontend
+│   ├── web-shell/      # Host microfrontend (owns auth routes)
+│   ├── web-accounts/   # Accounts microfrontend (remote)
 │   └── mobile/         # React Native app
 ├── packages/
 │   ├── core/           # Shared business logic (@repo/core)

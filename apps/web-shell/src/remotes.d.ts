@@ -1,4 +1,4 @@
-declare module 'webAuth/LoginPage' {
-  const LoginPage: React.ComponentType;
-  export default LoginPage;
+declare module 'webAccounts/App' {
+  const App: React.ComponentType;
+  export default App;
 }

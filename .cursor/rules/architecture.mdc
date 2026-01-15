@@ -6,8 +6,8 @@ description: Project architecture - use when creating features
 
 ## Monorepo
 
-- apps/web-shell - Host MFE
-- apps/web-auth - Auth MFE
+- apps/web-shell - Host MFE (owns auth routes)
+- apps/web-accounts - Accounts MFE (remote)
 - apps/mobile - React Native
 - packages/core - Shared business logic (@repo/core)
 - packages/ui-web - Web design system (@repo/ui)

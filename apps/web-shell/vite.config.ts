@@ -10,7 +10,7 @@ export default defineConfig({
     federation({
       name: 'shell',
       remotes: {
-        webAuth: 'http://localhost:3001/assets/remoteEntry.js',
+        webAccounts: 'http://localhost:3001/assets/remoteEntry.js',
       },
       shared: {
         react: { singleton: true, requiredVersion: false },
