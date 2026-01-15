@@ -12,9 +12,16 @@ export default defineConfig({
       remotes: {
         webAuth: 'http://localhost:3001/assets/remoteEntry.js',
       },
-      shared: ['react', 'react-dom', 'react-router-dom'],
+      shared: {
+        react: { singleton: true, requiredVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false },
+        'react-router-dom': { singleton: true, requiredVersion: false },
+      } as any,
     }),
   ],
+  resolve: {
+    dedupe: ['react', 'react-dom', 'react-router-dom'],
+  },
   build: {
     modulePreload: false,
     target: 'esnext',
@@ -23,5 +30,6 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    cors: true,
   },
 });

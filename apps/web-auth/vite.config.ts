@@ -13,9 +13,16 @@ export default defineConfig({
       exposes: {
         './LoginPage': './src/pages/LoginPage.tsx',
       },
-      shared: ['react', 'react-dom', 'react-router-dom'],
+      shared: {
+        react: { singleton: true, requiredVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false },
+        'react-router-dom': { singleton: true, requiredVersion: false },
+      } as any,
     }),
   ],
+  resolve: {
+    dedupe: ['react', 'react-dom', 'react-router-dom'],
+  },
   build: {
     modulePreload: false,
     target: 'esnext',
@@ -24,5 +31,6 @@ export default defineConfig({
   },
   server: {
     port: 3001,
+    cors: true,
   },
 });
