@@ -6,34 +6,41 @@ React Native CLI (not Expo) for iOS and Android.
 
 ## Project Structure
 
+Components are colocated in the mobile app (no separate ui-mobile package):
+
 ```
 apps/mobile/
 ├── src/
 │   ├── app/
 │   │   └── App.tsx
-│   ├── navigation/
-│   │   ├── RootNavigator.tsx
-│   │   ├── AuthNavigator.tsx
-│   │   └── MainNavigator.tsx
-│   ├── screens/
-│   │   ├── auth/
-│   │   ├── dashboard/
-│   │   ├── accounts/
-│   │   └── transfers/
 │   ├── components/
-│   │   ├── ui/
-│   │   └── common/
+│   │   ├── ui/               # Reusable UI: Button, Input, Card
+│   │   └── common/           # App-level shared components
+│   ├── features/
+│   │   └── [name]/
+│   │       ├── screens/
+│   │       ├── components/   # Feature-specific components
+│   │       ├── hooks/
+│   │       ├── services/
+│   │       └── index.ts
 │   ├── services/
 │   │   ├── api/
+│   │   │   ├── client.ts     # Axios instance
+│   │   │   └── interceptors.ts
 │   │   └── security/
+│   │       └── secureStorage.ts
 │   ├── store/
-│   ├── hooks/
+│   │   └── auth.store.ts
+│   ├── navigation/
+│   ├── hooks/                # Shared hooks
 │   ├── utils/
 │   └── constants/
 ├── android/
 ├── ios/
 └── index.js
 ```
+
+> **Note:** UI components live in `src/components/ui/` rather than a separate package since there is only one mobile app.
 
 ---
 

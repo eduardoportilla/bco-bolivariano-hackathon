@@ -17,33 +17,69 @@ globs:
 ## Forms
 
 - react-hook-form for all forms
-- zod (v4 API) for validation schemas - use latest Zod 4 API patterns
+- zod (v4 API) for validation schemas
 - zodResolver for form validation
-- Query Context7 for latest Zod 4 API documentation and migration patterns when needed
 
-## Charts
+```typescript
+const schema = z.object({
+  email: z.string().email('Email invalido'),
+  amount: z.number().positive().max(10000),
+});
 
-- recharts for data visualization
-- Wrap in responsive containers
+const { register, handleSubmit, formState: { errors } } = useForm({
+  resolver: zodResolver(schema),
+});
+```
 
-## Module Federation Config
+## Data Fetching (React Query)
 
-Shell (apps/web-shell):
-- Imports remotes dynamically
-- Shares: react, react-dom, react-router-dom, zustand
+```typescript
+// Query keys in feature constants
+const QUERY_KEYS = {
+  accounts: ['accounts'] as const,
+  account: (id: string) => ['accounts', id] as const,
+};
 
-Remotes (apps/web-auth, etc.):
-- Expose pages via remoteEntry.js
-- Same shared dependencies as shell
+// Custom hook
+export function useAccounts() {
+  return useQuery({
+    queryKey: QUERY_KEYS.accounts,
+    queryFn: accountService.getAll,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+```
+
+## State (Zustand)
+
+```typescript
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  setUser: (user: User) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  isAuthenticated: false,
+  setUser: (user) => set({ user, isAuthenticated: true }),
+  logout: () => set({ user: null, isAuthenticated: false }),
+}));
+```
+
+## Module Federation
+
+Shell imports remotes dynamically, shares: react, react-dom, react-router-dom, zustand
 
 ## MFE Rules
 
 - Only Tailwind utility classes
 - No global CSS selectors
-- No conflicting @layer definitions
 - Lazy load remotes with Suspense
 
 ## References
 
 - `docs/guidelines/styling.md`
 - `docs/guidelines/components.md`
+- `docs/guidelines/services.md`

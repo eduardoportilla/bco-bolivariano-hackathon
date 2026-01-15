@@ -7,15 +7,16 @@ bbh/
 ├── apps/
 │   ├── web-shell/         # Host MFE (container)
 │   ├── web-auth/          # Auth MFE (remote)
-│   └── mobile/            # React Native app
+│   └── mobile/            # React Native app (components colocated)
 ├── packages/
-│   ├── ui-web/            # Web design system
-│   ├── ui-mobile/         # Mobile components
+│   ├── ui-web/            # Web design system (@repo/ui)
 │   ├── typescript-config/ # Shared TS configs
 │   └── eslint-config/     # Shared ESLint configs
 ├── docs/                  # Documentation
 └── scripts/               # Build and utility scripts
 ```
+
+> **Note:** Mobile components live directly in `apps/mobile/src/components/` since there is only one mobile app. Extract to a package only when sharing between multiple apps.
 
 ---
 
@@ -266,14 +267,15 @@ function App() {
 
 Use `@repo/` prefix for all internal packages:
 
-| Package | Name |
-|---------|------|
-| Web UI | `@repo/ui` |
-| Mobile UI | `@repo/ui-mobile` |
-| TypeScript Config | `@repo/typescript-config` |
-| ESLint Config | `@repo/eslint-config` |
-| Shared Types | `@repo/types` |
-| Core Utilities | `@repo/core` |
+| Package | Import Name | Folder |
+|---------|-------------|--------|
+| Web UI | `@repo/ui` | `packages/ui-web` |
+| TypeScript Config | `@repo/typescript-config` | `packages/typescript-config` |
+| ESLint Config | `@repo/eslint-config` | `packages/eslint-config` |
+| Shared Types | `@repo/types` | `packages/types` (when needed) |
+| Core Utilities | `@repo/core` | `packages/core` (when needed) |
+
+> **Note:** Mobile components are colocated in `apps/mobile/src/components/` and do not have a separate package.
 
 ---
 

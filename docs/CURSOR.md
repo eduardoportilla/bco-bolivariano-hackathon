@@ -42,7 +42,7 @@ fix(mobile): corregir validacion de transferencia
 refactor(ui-web): optimizar componente Card
 ```
 
-Scopes: `web-shell`, `web-auth`, `mobile`, `ui-web`, `ui-mobile`, `core`
+Scopes: `web-shell`, `web-auth`, `mobile`, `ui` (for ui-web package)
 
 ### 5. PR
 
@@ -75,6 +75,7 @@ Auto-applied from `.cursor/rules/`:
 | `security.mdc` | Always |
 | `web.mdc` | Editing web files |
 | `mobile.mdc` | Editing mobile files |
+| `services.mdc` | Creating services/API calls |
 | `testing.mdc` | Writing tests |
 | `architecture.mdc` | Creating features |
 
@@ -110,6 +111,7 @@ Detailed reference in `docs/guidelines/`:
 | `components.md` | Component patterns |
 | `styling.md` | TailwindCSS, shadcn |
 | `architecture.md` | Feature organization |
+| `services.md` | API, config, forms, state |
 | `security.md` | OWASP, tokens |
 | `mobile.md` | React Native |
 | `testing.md` | Vitest, Jest |

@@ -8,9 +8,8 @@ description: Project architecture - use when creating features
 
 - apps/web-shell - Host MFE
 - apps/web-auth - Auth MFE
-- apps/mobile - React Native
-- packages/ui-web - Web components
-- packages/ui-mobile - Mobile components
+- apps/mobile - React Native (components colocated in app)
+- packages/ui-web - Web design system (@repo/ui)
 
 ## Feature Structure
 
@@ -19,9 +18,21 @@ features/[name]/
 ├── components/
 ├── hooks/
 ├── services/
+│   └── [name].service.ts
 ├── types/
+│   └── [name].types.ts
 ├── [Name]Page.tsx
 └── index.ts
+```
+
+## Service Pattern
+
+```typescript
+// features/transfers/services/transfer.service.ts
+export const transferService = {
+  create: (data: TransferData) => apiClient.post('/transfers', data),
+  getById: (id: string) => apiClient.get(`/transfers/${id}`),
+};
 ```
 
 ## Import Rules
@@ -29,15 +40,20 @@ features/[name]/
 - Features: import from shared/ and @repo/*
 - Never import between features
 - Export via index.ts public API
+- Use @repo/ui for web components (from packages/ui-web)
 
 ## When to Extract
 
-- To shared/: Used by 2+ features
+- To shared/: Used by 2+ features in same app
 - To packages/: Used by 2+ apps
 
 ## Package Naming
 
-@repo/ui, @repo/core, @repo/types
+| Package | Import | Folder |
+|---------|--------|--------|
+| Web UI | @repo/ui | packages/ui-web |
+| TypeScript | @repo/typescript-config | packages/typescript-config |
+| ESLint | @repo/eslint-config | packages/eslint-config |
 
 ## References
 

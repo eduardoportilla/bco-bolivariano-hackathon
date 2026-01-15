@@ -1,0 +1,73 @@
+---
+description: Service, API, and state patterns
+---
+
+# Services and State
+
+## Service Pattern
+
+```typescript
+// features/[name]/services/[name].service.ts
+export const accountService = {
+  getAll: () => apiClient.get<Account[]>('/accounts'),
+  getById: (id: string) => apiClient.get<Account>(`/accounts/${id}`),
+  create: (data: CreateData) => apiClient.post<Account>('/accounts', data),
+};
+```
+
+## React Query
+
+```typescript
+// Query keys as constants
+const KEYS = {
+  all: ['accounts'] as const,
+  detail: (id: string) => ['accounts', id] as const,
+};
+
+// Custom hooks
+export function useAccounts() {
+  return useQuery({
+    queryKey: KEYS.all,
+    queryFn: accountService.getAll,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+```
+
+## Zustand
+
+```typescript
+// Use selectors to avoid re-renders
+const user = useAuthStore((s) => s.user);
+
+// Avoid destructuring entire store
+const { user } = useAuthStore(); // BAD
+```
+
+## Forms
+
+```typescript
+// Schema in features/[name]/schemas/
+const schema = z.object({
+  email: z.string().email('Email invalido'),
+  amount: z.number().positive(),
+});
+
+// Form with zodResolver
+const { register, handleSubmit } = useForm({
+  resolver: zodResolver(schema),
+});
+```
+
+## Response Validation
+
+Always validate API responses with zod:
+
+```typescript
+const response = await apiClient.get('/accounts');
+return accountsSchema.parse(response.data);
+```
+
+## References
+
+See `docs/guidelines/services.md` for full patterns.

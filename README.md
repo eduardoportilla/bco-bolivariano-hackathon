@@ -87,12 +87,11 @@ bbh/
 ├── apps/
 │   ├── web-shell/      # Host microfrontend
 │   ├── web-auth/       # Authentication microfrontend
-│   └── mobile/         # React Native app
+│   └── mobile/         # React Native app (components colocated)
 ├── packages/
-│   ├── ui-web/         # Web design system
-│   └── ui-mobile/      # Mobile components
+│   └── ui-web/         # Web design system (@repo/ui)
 ├── docs/
-│   └── agents/         # AI development framework
+│   └── guidelines/     # Development guidelines
 └── scripts/            # Build utilities
 ```
 

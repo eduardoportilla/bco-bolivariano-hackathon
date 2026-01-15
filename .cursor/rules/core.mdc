@@ -7,17 +7,15 @@ alwaysApply: true
 
 ## Tech Stack
 
-- Web: React 19 (explicitly required), TypeScript, Vite, TailwindCSS 4.1, shadcn/ui
+- Web: React 19, TypeScript, Vite, TailwindCSS 4.1, shadcn/ui
 - Mobile: React Native CLI, TypeScript
-- Forms: react-hook-form + zod (use Zod 4 API)
+- Forms: react-hook-form + zod (v4 API)
 - State: Zustand (client), React Query (server)
 - Monorepo: pnpm, Turborepo
 
 ## Documentation and Patterns
 
-- Always use the latest documentation and patterns for libraries and frameworks
-- Use Context7 MCP server to retrieve up-to-date documentation and code examples when needed
-- Query Context7 for latest API changes, best practices, and migration guides
+- Use Context7 MCP server for up-to-date documentation
 - Prefer official documentation patterns over outdated examples
 
 ## Critical Rules
@@ -28,9 +26,17 @@ alwaysApply: true
 - All imports must be included
 - Use @repo/ prefix for internal packages
 - Spanish for UI text, English for code
-- No console.log (use logger)
+- No console.log (use logger from shared/utils)
 - No hardcoded secrets
 - Always write tests for new features
+
+## Package Structure
+
+| Package | Name | Purpose |
+|---------|------|---------|
+| packages/ui-web | @repo/ui | Web design system |
+| packages/eslint-config | @repo/eslint-config | Shared linting |
+| packages/typescript-config | @repo/typescript-config | TS configs |
 
 ## Commands
 
@@ -56,11 +62,12 @@ Conventional commits in Spanish:
 ```
 feat(web-auth): agregar validacion de email
 fix(mobile): corregir navegacion en dashboard
-refactor(ui-web): simplificar componente Button
+refactor(ui): simplificar componente Button
 ```
 
-Scopes: web-shell, web-*, mobile, ui-web, ui-mobile, core
+Scopes: web-shell, web-auth, mobile, ui (for ui-web package)
 
 ## References
 
-See `docs/guidelines/coding.md` for detailed patterns.
+- `docs/guidelines/coding.md` - Code patterns
+- `docs/guidelines/services.md` - Service/config patterns

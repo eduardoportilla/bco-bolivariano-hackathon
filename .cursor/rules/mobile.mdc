@@ -2,27 +2,30 @@
 description: React Native development patterns
 globs:
   - apps/mobile/**
-  - packages/ui-mobile/**
 ---
 
 # Mobile Development
 
-## Feature-Based Structure (Required)
+## Structure
+
+Components are colocated in the mobile app (no separate ui-mobile package):
 
 ```
-src/
+apps/mobile/src/
+├── components/
+│   ├── ui/           # Reusable UI components (Button, Input, Card)
+│   └── common/       # Shared app components
 ├── features/
-│   ├── auth/
-│   │   ├── screens/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── services/
-│   │   └── index.ts
-│   ├── dashboard/
-│   ├── accounts/
-│   └── transfers/
-├── shared/
+│   └── [name]/
+│       ├── screens/
+│       ├── components/
+│       ├── hooks/
+│       ├── services/
+│       └── index.ts
+├── services/
+│   └── api/          # API client and shared services
 ├── navigation/
+├── store/
 └── constants/
 ```
 
@@ -32,6 +35,21 @@ src/
 - No NativeWind or Tailwind
 - Design tokens from @/constants
 
+## Services
+
+```typescript
+// services/api/client.ts
+export const apiClient = axios.create({
+  baseURL: Config.API_URL,
+});
+
+// features/accounts/services/account.service.ts
+export const accountService = {
+  getAll: () => apiClient.get<Account[]>('/accounts'),
+  getById: (id: string) => apiClient.get<Account>(`/accounts/${id}`),
+};
+```
+
 ## Navigation
 
 - React Navigation with typed RootStackParamList
@@ -40,7 +58,7 @@ src/
 ## Forms
 
 - react-hook-form for all forms
-- zod for validation
+- zod (v4 API) for validation
 
 ## Performance
 
