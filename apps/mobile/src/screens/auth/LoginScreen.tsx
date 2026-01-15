@@ -46,9 +46,9 @@ export function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* EJEMPLO REANIMATED: Descomentar despues de rebuild nativo */}
-          showExample && (
+          {showExample && (
             <AnimatedExample onRemove={() => setShowExample(false)} />
-          )
+          )}
 
           <View style={styles.header}>
             <View style={styles.iconContainer}>
