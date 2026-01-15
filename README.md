@@ -22,6 +22,9 @@ cd bbh
 
 # Install dependencies
 pnpm install
+
+# Install Playwright browsers (for E2E tests in web apps)
+pnpm exec playwright install
 ```
 
 ---
