@@ -19,19 +19,22 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@repo/core": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.90.17",
     "axios": "^1.13.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.6.1"
+    "react-hook-form": "^7.71.1",
+    "react-router-dom": "^7.6.1",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
     "@originjs/vite-plugin-federation": "^1.4.1",
     "@playwright/test": "^1.57.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@tailwindcss/vite": "^4.1.11",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
