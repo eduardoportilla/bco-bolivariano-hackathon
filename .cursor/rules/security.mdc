@@ -1,0 +1,30 @@
+---
+description: Banking security rules - must follow for financial app
+alwaysApply: true
+---
+
+# Security Rules
+
+## Forbidden
+
+- Hardcode secrets or API keys
+- Store tokens in localStorage/sessionStorage
+- Use eval() or Function()
+- Log sensitive data (tokens, passwords, cards)
+- dangerouslySetInnerHTML without DOMPurify
+
+## Token Storage
+
+- Web: httpOnly cookies only (backend sets)
+- Mobile: Keychain (iOS) / Keystore (Android)
+
+## Required
+
+- Validate API responses with zod
+- Sanitize user input with DOMPurify
+- CSRF tokens for mutations
+- Session timeout (5 min inactivity)
+
+## References
+
+See `docs/guidelines/security.md` for OWASP details.

@@ -13,8 +13,7 @@ bbh/
 │   ├── ui-mobile/         # Mobile components
 │   ├── typescript-config/ # Shared TS configs
 │   └── eslint-config/     # Shared ESLint configs
-├── docs/
-│   └── agents/            # AI development framework
+├── docs/                  # Documentation
 └── scripts/               # Build and utility scripts
 ```
 

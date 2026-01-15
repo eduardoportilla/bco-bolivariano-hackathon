@@ -1,0 +1,58 @@
+---
+description: React Native development patterns
+globs:
+  - apps/mobile/**
+  - packages/ui-mobile/**
+---
+
+# Mobile Development
+
+## Feature-Based Structure (Required)
+
+```
+src/
+├── features/
+│   ├── auth/
+│   │   ├── screens/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   └── index.ts
+│   ├── dashboard/
+│   ├── accounts/
+│   └── transfers/
+├── shared/
+├── navigation/
+└── constants/
+```
+
+## Styling
+
+- Native StyleSheet.create() only
+- No NativeWind or Tailwind
+- Design tokens from @/constants
+
+## Navigation
+
+- React Navigation with typed RootStackParamList
+- Feature screens in features/[name]/screens/
+
+## Forms
+
+- react-hook-form for all forms
+- zod for validation
+
+## Performance
+
+- FlatList for lists (never ScrollView + map)
+- useCallback, useMemo, React.memo
+- Profile with Flipper
+
+## Security
+
+- Keychain (iOS) / Keystore (Android) for tokens
+- Never use AsyncStorage for sensitive data
+
+## References
+
+See `docs/guidelines/mobile.md` for full patterns.

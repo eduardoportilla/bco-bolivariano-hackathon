@@ -1,0 +1,32 @@
+---
+description: Testing patterns - use when writing tests
+---
+
+# Testing
+
+## Stack
+
+- Web: Vitest + React Testing Library + Playwright
+- Mobile: Jest + React Testing Library + Detox
+
+## AAA Pattern
+
+1. Arrange - Set up test data
+2. Act - Execute code
+3. Assert - Verify outcome
+
+## Commands
+
+- `pnpm test` - Run all
+- `pnpm --filter [app] test` - Run specific
+
+## Rules
+
+- Test behavior, not implementation
+- Accessible queries (getByRole, getByLabelText)
+- Co-locate tests with components
+- Coverage: 70%+ for components, 80%+ for packages
+
+## References
+
+See `docs/guidelines/testing.md` for examples.

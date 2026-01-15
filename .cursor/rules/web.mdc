@@ -1,0 +1,49 @@
+---
+description: Web development patterns for React/Vite apps
+globs:
+  - apps/web-*/**
+  - packages/ui-web/**
+---
+
+# Web Development
+
+## Styling
+
+- TailwindCSS 4.1 with @tailwindcss/vite plugin
+- cn() from @repo/ui/lib/utils for conditional classes
+- No inline styles
+- Design tokens from @repo/ui package
+
+## Forms
+
+- react-hook-form for all forms
+- zod (v4 API) for validation schemas - use latest Zod 4 API patterns
+- zodResolver for form validation
+- Query Context7 for latest Zod 4 API documentation and migration patterns when needed
+
+## Charts
+
+- recharts for data visualization
+- Wrap in responsive containers
+
+## Module Federation Config
+
+Shell (apps/web-shell):
+- Imports remotes dynamically
+- Shares: react, react-dom, react-router-dom, zustand
+
+Remotes (apps/web-auth, etc.):
+- Expose pages via remoteEntry.js
+- Same shared dependencies as shell
+
+## MFE Rules
+
+- Only Tailwind utility classes
+- No global CSS selectors
+- No conflicting @layer definitions
+- Lazy load remotes with Suspense
+
+## References
+
+- `docs/guidelines/styling.md`
+- `docs/guidelines/components.md`

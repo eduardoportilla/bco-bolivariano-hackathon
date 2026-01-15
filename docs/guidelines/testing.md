@@ -213,41 +213,6 @@ describe('LoginForm', () => {
 });
 ```
 
-### Hook Test Example
-
-```typescript
-// src/hooks/useAuth.test.ts
-import { describe, it, expect, vi } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuth } from './useAuth';
-
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-}
-
-describe('useAuth', () => {
-  it('should return authenticated user', async () => {
-    // Arrange
-    vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);
-
-    // Act
-    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
-
-    // Assert
-    await waitFor(() => {
-      expect(result.current.user).toEqual(mockUser);
-      expect(result.current.isAuthenticated).toBe(true);
-    });
-  });
-});
-```
-
 ---
 
 ## Web E2E (Playwright)
@@ -298,19 +263,6 @@ test.describe('Authentication', () => {
     await expect(page).toHaveURL('/dashboard');
     await expect(page.getByText(/bienvenido/i)).toBeVisible();
   });
-
-  test('should show error for invalid credentials', async ({ page }) => {
-    // Arrange
-    await page.goto('/login');
-
-    // Act
-    await page.getByLabel(/email/i).fill('user@example.com');
-    await page.getByLabel(/password/i).fill('wrongPassword');
-    await page.getByRole('button', { name: /iniciar sesion/i }).click();
-
-    // Assert
-    await expect(page.getByText(/credenciales invalidas/i)).toBeVisible();
-  });
 });
 ```
 
@@ -335,21 +287,6 @@ module.exports = {
 };
 ```
 
-### Test Setup
-
-```typescript
-// src/test/setup.ts
-import '@testing-library/react-native/extend-expect';
-import { jest } from '@jest/globals';
-
-// Mock react-native-keychain
-jest.mock('react-native-keychain', () => ({
-  setGenericPassword: jest.fn(),
-  getGenericPassword: jest.fn(),
-  resetGenericPassword: jest.fn(),
-}));
-```
-
 ### Component Test Example
 
 ```typescript
@@ -360,130 +297,15 @@ import { Button } from './Button';
 
 describe('Button', () => {
   it('should render title correctly', () => {
-    // Arrange & Act
     render(<Button title="Continuar" onPress={jest.fn()} />);
-
-    // Assert
     expect(screen.getByText('Continuar')).toBeOnTheScreen();
   });
 
   it('should call onPress when tapped', () => {
-    // Arrange
     const onPress = jest.fn();
     render(<Button title="Continuar" onPress={onPress} />);
-
-    // Act
     fireEvent.press(screen.getByText('Continuar'));
-
-    // Assert
     expect(onPress).toHaveBeenCalledTimes(1);
-  });
-
-  it('should be disabled when disabled prop is true', () => {
-    // Arrange
-    const onPress = jest.fn();
-    render(<Button title="Continuar" onPress={onPress} disabled />);
-
-    // Act
-    fireEvent.press(screen.getByText('Continuar'));
-
-    // Assert
-    expect(onPress).not.toHaveBeenCalled();
-  });
-});
-```
-
----
-
-## Mobile E2E (Detox)
-
-### Configuration
-
-```javascript
-// apps/mobile/.detoxrc.js
-module.exports = {
-  testRunner: {
-    args: {
-      $0: 'jest',
-      config: 'e2e/jest.config.js',
-    },
-    jest: {
-      setupTimeout: 120000,
-    },
-  },
-  apps: {
-    'ios.debug': {
-      type: 'ios.app',
-      binaryPath: 'ios/build/Build/Products/Debug-iphonesimulator/Mobile.app',
-      build: 'xcodebuild -workspace ios/Mobile.xcworkspace -scheme Mobile -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build',
-    },
-    'android.debug': {
-      type: 'android.apk',
-      binaryPath: 'android/app/build/outputs/apk/debug/app-debug.apk',
-      build: 'cd android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug',
-    },
-  },
-  devices: {
-    simulator: {
-      type: 'ios.simulator',
-      device: { type: 'iPhone 15' },
-    },
-    emulator: {
-      type: 'android.emulator',
-      device: { avdName: 'Pixel_7_API_34' },
-    },
-  },
-  configurations: {
-    'ios.sim.debug': {
-      device: 'simulator',
-      app: 'ios.debug',
-    },
-    'android.emu.debug': {
-      device: 'emulator',
-      app: 'android.debug',
-    },
-  },
-};
-```
-
-### E2E Test Example
-
-```typescript
-// e2e/auth.e2e.ts
-import { device, element, by, expect } from 'detox';
-
-describe('Authentication', () => {
-  beforeAll(async () => {
-    await device.launchApp();
-  });
-
-  beforeEach(async () => {
-    await device.reloadReactNative();
-  });
-
-  it('should login successfully with valid credentials', async () => {
-    // Arrange - already on login screen
-
-    // Act
-    await element(by.id('email-input')).typeText('user@example.com');
-    await element(by.id('password-input')).typeText('validPassword123');
-    await element(by.id('login-button')).tap();
-
-    // Assert
-    await expect(element(by.id('dashboard-screen'))).toBeVisible();
-    await expect(element(by.text('Bienvenido'))).toBeVisible();
-  });
-
-  it('should show error for invalid credentials', async () => {
-    // Arrange - already on login screen
-
-    // Act
-    await element(by.id('email-input')).typeText('user@example.com');
-    await element(by.id('password-input')).typeText('wrongPassword');
-    await element(by.id('login-button')).tap();
-
-    // Assert
-    await expect(element(by.text('Credenciales invalidas'))).toBeVisible();
   });
 });
 ```
@@ -505,51 +327,6 @@ Add testID to components for Detox:
 <Pressable testID="login-button" onPress={handleLogin}>
   <Text>Iniciar Sesion</Text>
 </Pressable>
-```
-
----
-
-## Mocking
-
-### Vitest Mocks
-
-```typescript
-import { vi, describe, it, beforeEach } from 'vitest';
-import { authService } from '@/services/auth';
-
-vi.mock('@/services/auth');
-
-describe('LoginPage', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should redirect after login', async () => {
-    vi.mocked(authService.login).mockResolvedValue({ user: mockUser });
-    // ... test code
-  });
-});
-```
-
-### Jest Mocks
-
-```typescript
-import { jest, describe, it, beforeEach } from '@jest/globals';
-
-jest.mock('@/services/auth');
-
-const mockAuthService = jest.mocked(authService);
-
-describe('LoginScreen', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should navigate after login', async () => {
-    mockAuthService.login.mockResolvedValue({ user: mockUser });
-    // ... test code
-  });
-});
 ```
 
 ---

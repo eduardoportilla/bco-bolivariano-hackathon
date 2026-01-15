@@ -1,0 +1,66 @@
+---
+description: Core coding standards for the BBH project
+alwaysApply: true
+---
+
+# Core Standards
+
+## Tech Stack
+
+- Web: React 19 (explicitly required), TypeScript, Vite, TailwindCSS 4.1, shadcn/ui
+- Mobile: React Native CLI, TypeScript
+- Forms: react-hook-form + zod (use Zod 4 API)
+- State: Zustand (client), React Query (server)
+- Monorepo: pnpm, Turborepo
+
+## Documentation and Patterns
+
+- Always use the latest documentation and patterns for libraries and frameworks
+- Use Context7 MCP server to retrieve up-to-date documentation and code examples when needed
+- Query Context7 for latest API changes, best practices, and migration guides
+- Prefer official documentation patterns over outdated examples
+
+## Critical Rules
+
+- No emojis in code or comments
+- Named exports only (no default exports)
+- Explicit types (no implicit any)
+- All imports must be included
+- Use @repo/ prefix for internal packages
+- Spanish for UI text, English for code
+- No console.log (use logger)
+- No hardcoded secrets
+- Always write tests for new features
+
+## Commands
+
+- `pnpm dev` - Start development
+- `pnpm build` - Build all
+- `pnpm typecheck` - Type check
+- `pnpm lint` - Lint all
+- `pnpm test` - Run tests
+- `pnpm clean` - Reset project
+
+## Import Order
+
+1. React and external libraries
+2. Internal packages (@repo/*)
+3. Relative imports
+4. Type-only imports
+5. Styles
+
+## Commits
+
+Conventional commits in Spanish:
+
+```
+feat(web-auth): agregar validacion de email
+fix(mobile): corregir navegacion en dashboard
+refactor(ui-web): simplificar componente Button
+```
+
+Scopes: web-shell, web-*, mobile, ui-web, ui-mobile, core
+
+## References
+
+See `docs/guidelines/coding.md` for detailed patterns.

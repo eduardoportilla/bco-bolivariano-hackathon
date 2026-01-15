@@ -1,0 +1,44 @@
+---
+description: Project architecture - use when creating features
+---
+
+# Architecture
+
+## Monorepo
+
+- apps/web-shell - Host MFE
+- apps/web-auth - Auth MFE
+- apps/mobile - React Native
+- packages/ui-web - Web components
+- packages/ui-mobile - Mobile components
+
+## Feature Structure
+
+```
+features/[name]/
+├── components/
+├── hooks/
+├── services/
+├── types/
+├── [Name]Page.tsx
+└── index.ts
+```
+
+## Import Rules
+
+- Features: import from shared/ and @repo/*
+- Never import between features
+- Export via index.ts public API
+
+## When to Extract
+
+- To shared/: Used by 2+ features
+- To packages/: Used by 2+ apps
+
+## Package Naming
+
+@repo/ui, @repo/core, @repo/types
+
+## References
+
+See `docs/guidelines/architecture.md` for details.
