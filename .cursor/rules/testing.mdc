@@ -8,25 +8,54 @@ description: Testing patterns - use when writing tests
 
 - Web: Vitest + React Testing Library + Playwright
 - Mobile: Jest + React Testing Library + Detox
+- Packages: Vitest
+
+## Test Organization (Hybrid)
+
+| Type | Location | Purpose |
+|------|----------|---------|
+| Unit | Co-located `*.test.ts` | Single function/component |
+| Integration | `__tests__/integration/` | Multi-feature flows |
+| E2E | `e2e/` | Full user journeys |
+| Utilities | `src/test/` | Mocks, factories, setup |
 
 ## AAA Pattern
 
-1. Arrange - Set up test data
-2. Act - Execute code
-3. Assert - Verify outcome
+```typescript
+it('should do something', () => {
+  // Arrange - Set up test data
+  // Act - Execute code
+  // Assert - Verify outcome
+});
+```
 
 ## Commands
 
 - `pnpm test` - Run all
 - `pnpm --filter [app] test` - Run specific
+- `pnpm --filter @repo/core test` - Test core package
 
 ## Rules
 
 - Test behavior, not implementation
 - Accessible queries (getByRole, getByLabelText)
-- Co-locate tests with components
-- Coverage: 70%+ for components, 80%+ for packages
+- Co-locate unit tests with source files
+- Coverage: 70%+ components, 80%+ packages
+
+## Service Testing
+
+```typescript
+// Mock the HttpClient adapter
+const mockHttp: HttpClient = {
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  patch: vi.fn(),
+  delete: vi.fn(),
+};
+const service = createAccountsService(mockHttp);
+```
 
 ## References
 
-See `docs/guidelines/testing.md` for examples.
+See `docs/guidelines/testing.md` for full examples.

@@ -1,0 +1,84 @@
+---
+description: React Query hook patterns - use when creating data hooks
+globs:
+  - apps/**/hooks/**
+  - apps/**/features/**/hooks/**
+---
+
+# React Query Hooks
+
+## Naming Convention
+
+| Hook Type | Pattern | Example |
+|-----------|---------|---------|
+| Query (list) | `use[Domain]s` | `useAccounts` |
+| Query (single) | `use[Domain]` | `useAccount(id)` |
+| Mutation (create) | `useCreate[Domain]` | `useCreateTransfer` |
+| Mutation (update) | `useUpdate[Domain]` | `useUpdateAccount` |
+| Mutation (delete) | `useDelete[Domain]` | `useDeleteContact` |
+
+## File Structure
+
+```
+features/[domain]/hooks/
+├── useAccounts.ts      # List query
+├── useAccount.ts       # Single query + balance
+├── useCreateAccount.ts # Mutations
+└── index.ts            # Re-exports
+```
+
+## Query Hook Pattern
+
+```typescript
+import { useQuery } from '@tanstack/react-query';
+import { accountKeys } from '@repo/core/domains/accounts';
+import { accountsService } from '@/services';
+
+export function useAccounts() {
+  return useQuery({
+    queryKey: accountKeys.lists(),
+    queryFn: accountsService.getAll,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useAccount(id: string) {
+  return useQuery({
+    queryKey: accountKeys.detail(id),
+    queryFn: () => accountsService.getById(id),
+    enabled: !!id,
+  });
+}
+```
+
+## Mutation Hook Pattern
+
+```typescript
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { transferKeys, accountKeys } from '@repo/core/domains/transfers';
+import { transfersService } from '@/services';
+
+export function useCreateTransfer() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: transfersService.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: transferKeys.all });
+      queryClient.invalidateQueries({ queryKey: accountKeys.all });
+    },
+  });
+}
+```
+
+## Rules
+
+- Import query keys from `@repo/core/domains/*`
+- Import services from `@/services`
+- Invalidate related queries on mutations
+- Use `enabled` for conditional queries
+- Set appropriate `staleTime`
+
+## References
+
+See `docs/guidelines/services.md` for service patterns.

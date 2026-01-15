@@ -7,8 +7,9 @@ bbh/
 ├── apps/
 │   ├── web-shell/         # Host MFE (container)
 │   ├── web-auth/          # Auth MFE (remote)
-│   └── mobile/            # React Native app (components colocated)
+│   └── mobile/            # React Native app
 ├── packages/
+│   ├── core/              # Shared business logic (@repo/core)
 │   ├── ui-web/            # Web design system (@repo/ui)
 │   ├── typescript-config/ # Shared TS configs
 │   └── eslint-config/     # Shared ESLint configs
@@ -16,7 +17,92 @@ bbh/
 └── scripts/               # Build and utility scripts
 ```
 
-> **Note:** Mobile components live directly in `apps/mobile/src/components/` since there is only one mobile app. Extract to a package only when sharing between multiple apps.
+---
+
+## Core Package (@repo/core)
+
+The `@repo/core` package contains shared business logic that is used by both web and mobile apps.
+
+### Structure (Hybrid Domain-Based)
+
+```
+packages/core/src/
+├── adapters/                 # Platform adapter interfaces
+│   ├── http.adapter.ts       # HttpClient interface
+│   └── storage.adapter.ts    # SecureStorage interface
+├── domains/                  # Business domains
+│   ├── auth/
+│   │   ├── types.ts          # User, LoginCredentials
+│   │   ├── schema.ts         # Zod validation schemas
+│   │   ├── service.ts        # createAuthService(http)
+│   │   ├── service.test.ts   # Co-located tests
+│   │   ├── queries.ts        # React Query keys
+│   │   └── index.ts
+│   ├── accounts/
+│   │   └── ...
+│   └── transfers/
+│       └── ...
+└── shared/                   # Cross-cutting utilities
+    ├── utils/
+    │   ├── formatters.ts
+    │   └── validators.ts
+    └── constants/
+        ├── api.ts            # API_ENDPOINTS
+        └── errors.ts         # ERROR_CODES
+```
+
+### Adapter Pattern
+
+The core package uses dependency injection via adapters to allow platform-specific implementations:
+
+```typescript
+// packages/core/src/adapters/http.adapter.ts
+export interface HttpClient {
+  get<T>(url: string): Promise<T>;
+  post<T>(url: string, data?: unknown): Promise<T>;
+  put<T>(url: string, data?: unknown): Promise<T>;
+  delete<T>(url: string): Promise<T>;
+}
+
+// packages/core/src/domains/accounts/service.ts
+export function createAccountsService(http: HttpClient) {
+  return {
+    getAll: () => http.get<Account[]>(API_ENDPOINTS.accounts.list),
+    getById: (id: string) => http.get<Account>(API_ENDPOINTS.accounts.detail(id)),
+  };
+}
+```
+
+Each app provides its own adapter implementation:
+
+```typescript
+// apps/web-shell/src/adapters/http.web.ts
+// Uses axios with httpOnly cookies
+
+// apps/mobile/src/adapters/http.mobile.ts
+// Uses axios with Keychain/Keystore tokens
+```
+
+### Usage in Apps
+
+```typescript
+// apps/web-shell/src/services/index.ts
+import { httpClient } from '../adapters/http.web';
+import { createAccountsService } from '@repo/core/domains/accounts';
+
+export const accountsService = createAccountsService(httpClient);
+```
+
+### What Goes in Core
+
+| Include | Exclude |
+|---------|---------|
+| Types/interfaces | React components |
+| Zod validation schemas | Platform-specific code |
+| Service factories | UI logic |
+| Query key factories | Navigation |
+| Utility functions | Storage implementations |
+| Constants | HTTP client implementations |
 
 ---
 
@@ -27,40 +113,38 @@ Organize application code by **feature/domain**, not by file type.
 ### Web App Structure
 
 ```
-apps/web-auth/src/
+apps/web-shell/src/
+├── adapters/
+│   └── http.web.ts              # HttpClient implementation
+├── services/
+│   └── index.ts                 # Wired services from @repo/core
 ├── features/                    # Feature modules (domain-driven)
-│   ├── login/
-│   │   ├── components/          # Feature-specific components
-│   │   │   ├── LoginForm.tsx
-│   │   │   └── BiometricButton.tsx
-│   │   ├── hooks/               # Feature-specific hooks
-│   │   │   └── useLogin.ts
-│   │   ├── services/            # Feature-specific API calls
-│   │   │   └── login.service.ts
-│   │   ├── types/               # Feature-specific types
-│   │   │   └── login.types.ts
-│   │   ├── LoginPage.tsx        # Page/Screen component
-│   │   └── index.ts             # Public API (re-exports)
-│   ├── password-recovery/
+│   ├── auth/
 │   │   ├── components/
-│   │   ├── hooks/
+│   │   │   └── LoginForm.tsx
+│   │   ├── hooks/               # useLogin, useAuth, useLogout
+│   │   │   ├── useLogin.ts
+│   │   │   ├── useAuth.ts
+│   │   │   └── index.ts
+│   │   ├── LoginPage.tsx
+│   │   └── index.ts
+│   ├── accounts/
+│   │   ├── components/
+│   │   ├── hooks/               # useAccounts, useAccount
 │   │   └── ...
-│   └── mfa/
+│   └── transfers/
+│       ├── components/
+│       ├── hooks/               # useTransfers, useCreateTransfer
 │       └── ...
 ├── shared/                      # Cross-feature shared code
-│   ├── components/              # Reusable UI (non-domain specific)
-│   │   └── Loading.tsx
-│   ├── hooks/                   # Shared hooks
-│   │   └── useLocalStorage.ts
-│   ├── services/                # Shared services
-│   │   └── analytics.service.ts
-│   ├── utils/                   # Utility functions
-│   │   └── validation.ts
-│   └── types/                   # Shared types
-│       └── common.types.ts
-├── config/                      # App configuration
-│   └── routes.ts
-└── app/                         # App bootstrap
+│   ├── components/
+│   ├── hooks/
+│   └── utils/
+├── test/                        # Test utilities
+│   ├── setup.ts
+│   ├── mocks/
+│   └── factories/
+└── app/
     ├── App.tsx
     ├── providers.tsx
     └── router.tsx
@@ -70,28 +154,27 @@ apps/web-auth/src/
 
 ```
 apps/mobile/src/
+├── adapters/
+│   └── http.mobile.ts           # HttpClient implementation
+├── services/
+│   ├── index.ts                 # Wired services from @repo/core
+│   └── security/
+│       └── secureStorage.ts     # Keychain/Keystore
 ├── features/
 │   ├── auth/
-│   │   ├── screens/             # Screens instead of pages
-│   │   │   ├── LoginScreen.tsx
-│   │   │   └── BiometricScreen.tsx
+│   │   ├── screens/
+│   │   │   └── LoginScreen.tsx
 │   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── services/
+│   │   ├── hooks/               # useLogin, useAuth, useLogout
 │   │   └── index.ts
-│   ├── dashboard/
 │   ├── accounts/
+│   │   ├── hooks/               # useAccounts, useAccount
+│   │   └── ...
 │   └── transfers/
-├── shared/
-│   ├── components/
-│   ├── hooks/
-│   └── navigation/
-│       ├── RootNavigator.tsx
-│       └── types.ts
+├── components/
+│   └── ui/                      # Reusable UI components
+├── navigation/
 ├── constants/
-│   ├── colors.ts
-│   ├── spacing.ts
-│   └── typography.ts
 └── app/
     └── App.tsx
 ```

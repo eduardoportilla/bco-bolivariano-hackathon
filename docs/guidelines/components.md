@@ -1,46 +1,70 @@
 # Component Guidelines
 
-## Structure
+## File Structure
 
-### File Organization
-```
-ComponentName/
-├── ComponentName.tsx        # Main component
-├── ComponentName.test.tsx   # Tests
-├── useComponentName.ts      # Component-specific hook (if needed)
-└── index.ts                 # Re-export
-```
+### When to Use Parent Folder vs Single File
 
-### Single File (Simple Components)
+| Condition | Structure | Example |
+|-----------|-----------|---------|
+| Simple component | Single file | `Button.tsx` |
+| Component + test | Single file | `Button.tsx`, `Button.test.tsx` |
+| 3+ related files | Parent folder | `LoginForm/` |
+
+### Single File (Default)
+
+Use for simple, self-contained components:
+
 ```
 components/
 ├── Button.tsx
+├── Button.test.tsx      # Test co-located
 ├── Input.tsx
-└── Card.tsx
+├── Input.test.tsx
+├── Card.tsx
+└── index.ts             # Re-exports
 ```
+
+### Parent Folder (When Needed)
+
+Use when component has 3+ related files:
+
+```
+components/
+└── LoginForm/
+    ├── LoginForm.tsx        # Main component
+    ├── LoginForm.test.tsx   # Tests
+    ├── useLoginForm.ts      # Component-specific hook
+    ├── LoginFormFields.tsx  # Sub-component
+    └── index.ts             # Re-export
+```
+
+**Use parent folder when:**
+- Component has a dedicated hook
+- Component has multiple sub-components
+- Component has complex test setup with mocks
+- Component has related types/constants
 
 ---
 
-## Atomic Design
+## packages/ui-web Structure
 
-### packages/ui-web Structure
+Use flat structure (matches shadcn/ui pattern):
+
 ```
-src/components/
-├── atoms/           # Basic building blocks
+packages/ui-web/src/
+├── components/
 │   ├── Button.tsx
-│   ├── Input.tsx
-│   ├── Text.tsx
-│   └── index.ts
-├── molecules/       # Combinations of atoms
-│   ├── FormField.tsx
 │   ├── Card.tsx
-│   ├── Alert.tsx
+│   ├── Input.tsx
+│   ├── Dialog.tsx
 │   └── index.ts
-└── organisms/       # Complex components
-    ├── DataTable.tsx
-    ├── Form.tsx
-    └── index.ts
+├── lib/
+│   └── utils.ts          # cn() helper
+└── styles/
+    └── globals.css
 ```
+
+> **Note:** We do not use Atomic Design (atoms/molecules/organisms) to keep the structure simple and consistent with shadcn/ui.
 
 ---
 
@@ -83,6 +107,7 @@ export function Card({
 ## Props Interface Rules
 
 ### Required vs Optional
+
 ```typescript
 interface ButtonProps {
   // Required - no default needed
@@ -98,6 +123,7 @@ interface ButtonProps {
 ```
 
 ### Extending HTML Elements
+
 ```typescript
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary';
@@ -118,6 +144,7 @@ export function Button({ variant = 'primary', className, ...props }: ButtonProps
 ## Re-exports
 
 ### Component Index
+
 ```typescript
 // components/index.ts
 export { Button } from './Button';
@@ -129,6 +156,7 @@ export type { ButtonProps } from './Button';
 ```
 
 ### Package Exports
+
 ```json
 // package.json
 {
@@ -145,6 +173,7 @@ export type { ButtonProps } from './Button';
 ## Composition over Configuration
 
 ### Good: Composable
+
 ```tsx
 <Card>
   <CardHeader>
@@ -157,6 +186,7 @@ export type { ButtonProps } from './Button';
 ```
 
 ### Avoid: Over-configured
+
 ```tsx
 <Card 
   title="Title"
@@ -164,6 +194,26 @@ export type { ButtonProps } from './Button';
   headerVariant="large"
   contentPadding="medium"
 />
+```
+
+---
+
+## Feature Components
+
+Feature-specific components live in the feature folder:
+
+```
+features/transfers/
+├── components/
+│   ├── TransferForm.tsx
+│   ├── TransferForm.test.tsx
+│   ├── ContactSelector.tsx
+│   └── index.ts
+├── hooks/
+│   ├── useCreateTransfer.ts
+│   └── index.ts
+├── TransferPage.tsx
+└── index.ts
 ```
 
 ---
@@ -182,4 +232,8 @@ export function Button() {}         // GOOD
 // No implicit children
 function Card(props) {}             // BAD
 function Card({ children }: CardProps) {} // GOOD
+
+// No deeply nested components
+<Outer><Middle><Inner><Deep>...</Deep></Inner></Middle></Outer> // BAD
+// Extract to separate components
 ```

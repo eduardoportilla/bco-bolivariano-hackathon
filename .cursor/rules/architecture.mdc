@@ -8,52 +8,66 @@ description: Project architecture - use when creating features
 
 - apps/web-shell - Host MFE
 - apps/web-auth - Auth MFE
-- apps/mobile - React Native (components colocated in app)
+- apps/mobile - React Native
+- packages/core - Shared business logic (@repo/core)
 - packages/ui-web - Web design system (@repo/ui)
 
-## Feature Structure
+## Core Package (@repo/core)
+
+Shared types, schemas, services, and utilities:
+
+```
+packages/core/src/
+├── adapters/       # HttpClient, SecureStorage interfaces
+├── domains/        # auth, accounts, transfers
+│   └── [domain]/
+│       ├── types.ts
+│       ├── schema.ts
+│       ├── service.ts
+│       ├── queries.ts
+│       └── index.ts
+└── shared/         # utils, constants
+```
+
+## Feature Structure (Apps)
 
 ```
 features/[name]/
 ├── components/
-├── hooks/
-├── services/
-│   └── [name].service.ts
-├── types/
-│   └── [name].types.ts
-├── [Name]Page.tsx
+├── hooks/          # useAccounts, useCreateTransfer
+├── screens/        # Mobile only
+├── [Name]Page.tsx  # Web only
 └── index.ts
 ```
 
-## Service Pattern
+## Service Pattern (Adapter)
 
 ```typescript
-// features/transfers/services/transfer.service.ts
-export const transferService = {
-  create: (data: TransferData) => apiClient.post('/transfers', data),
-  getById: (id: string) => apiClient.get(`/transfers/${id}`),
-};
+// @repo/core - service factory
+export function createAccountsService(http: HttpClient) {
+  return {
+    getAll: () => http.get('/accounts'),
+  };
+}
+
+// App - wire with platform adapter
+import { httpClient } from '@/adapters/http.web';
+export const accountsService = createAccountsService(httpClient);
 ```
 
 ## Import Rules
 
-- Features: import from shared/ and @repo/*
+- Features: import from shared/, @repo/*, and @/services
 - Never import between features
-- Export via index.ts public API
-- Use @repo/ui for web components (from packages/ui-web)
-
-## When to Extract
-
-- To shared/: Used by 2+ features in same app
-- To packages/: Used by 2+ apps
+- Import types/schemas from @repo/core/domains/*
+- Import services from @/services (app-wired)
 
 ## Package Naming
 
 | Package | Import | Folder |
 |---------|--------|--------|
+| Core | @repo/core | packages/core |
 | Web UI | @repo/ui | packages/ui-web |
-| TypeScript | @repo/typescript-config | packages/typescript-config |
-| ESLint | @repo/eslint-config | packages/eslint-config |
 
 ## References
 

@@ -14,6 +14,90 @@ Best practices for testing across packages, web apps, and mobile apps.
 
 ---
 
+## Test Organization (Hybrid Structure)
+
+Use a hybrid approach for organizing tests:
+
+| Test Type | Location | Purpose |
+|-----------|----------|---------|
+| Unit | Co-located `*.test.ts` | Single function/component |
+| Integration | `__tests__/integration/` | Multi-feature flows |
+| E2E | `e2e/` | Full user journeys |
+| Test utilities | `src/test/` or `test/` | Mocks, factories, setup |
+
+### Packages (e.g., @repo/core)
+
+```
+packages/core/
+├── src/
+│   ├── domains/
+│   │   └── accounts/
+│   │       ├── service.ts
+│   │       └── service.test.ts     # Co-located unit test
+│   └── shared/
+│       └── utils/
+│           ├── formatters.ts
+│           └── formatters.test.ts  # Co-located unit test
+├── test/
+│   ├── mocks/
+│   │   └── http.mock.ts            # Shared mock HttpClient
+│   └── factories/
+│       └── account.factory.ts      # Test data factories
+└── vitest.config.ts
+```
+
+### Web Apps
+
+```
+apps/web-shell/
+├── src/
+│   ├── features/
+│   │   └── auth/
+│   │       ├── components/
+│   │       │   ├── LoginForm.tsx
+│   │       │   └── LoginForm.test.tsx   # Component unit test
+│   │       └── hooks/
+│   │           ├── useLogin.ts
+│   │           └── useLogin.test.ts     # Hook unit test
+│   └── test/
+│       ├── setup.ts                     # Vitest setup
+│       ├── mocks/
+│       │   ├── handlers.ts              # MSW handlers
+│       │   └── server.ts                # MSW server
+│       ├── factories/
+│       │   └── account.factory.ts
+│       └── utils/
+│           └── render.tsx               # Custom render with providers
+├── __tests__/
+│   └── integration/
+│       └── transfer-flow.test.ts        # Integration test
+└── e2e/
+    └── auth.spec.ts                     # Playwright E2E
+```
+
+### Mobile Apps
+
+```
+apps/mobile/
+├── src/
+│   ├── features/
+│   │   └── auth/
+│   │       ├── screens/
+│   │       │   ├── LoginScreen.tsx
+│   │       │   └── LoginScreen.test.tsx
+│   │       └── hooks/
+│   │           ├── useLogin.ts
+│   │           └── useLogin.test.ts
+│   └── test/
+│       ├── setup.ts
+│       ├── mocks/
+│       └── factories/
+└── e2e/
+    └── auth.e2e.ts                      # Detox E2E
+```
+
+---
+
 ## Test Structure (AAA Pattern)
 
 All tests must follow the **Arrange-Act-Assert** pattern:
@@ -37,56 +121,6 @@ describe('TransferService', () => {
 
 ---
 
-## File Organization
-
-### Packages
-
-```
-packages/core/
-├── src/
-│   ├── utils/
-│   │   └── formatters.ts
-│   └── services/
-│       └── auth.service.ts
-└── __tests__/
-    ├── utils/
-    │   └── formatters.test.ts
-    └── services/
-        └── auth.service.test.ts
-```
-
-### Web Apps
-
-```
-apps/web-auth/
-├── src/
-│   ├── components/
-│   │   └── LoginForm/
-│   │       ├── LoginForm.tsx
-│   │       └── LoginForm.test.tsx   # Co-located
-│   └── pages/
-│       └── LoginPage.tsx
-└── e2e/
-    └── auth.spec.ts                  # Playwright
-```
-
-### Mobile Apps
-
-```
-apps/mobile/
-├── src/
-│   ├── components/
-│   │   └── Button/
-│   │       ├── Button.tsx
-│   │       └── Button.test.tsx      # Co-located
-│   └── screens/
-│       └── LoginScreen.tsx
-└── e2e/
-    └── auth.e2e.ts                   # Detox
-```
-
----
-
 ## Packages (Vitest)
 
 ### Configuration
@@ -99,37 +133,56 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['__tests__/**/*.test.ts'],
+    include: ['src/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules', '__tests__'],
+      exclude: ['node_modules', 'dist', '**/*.test.ts'],
+      thresholds: {
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80,
+      },
     },
   },
 });
 ```
 
-### Unit Test Example
+### Service Test Example
 
 ```typescript
-// __tests__/utils/formatters.test.ts
-import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatDate } from '../../src/utils/formatters';
+// src/domains/accounts/service.test.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { HttpClient } from '../../adapters';
+import { createAccountsService } from './service';
 
-describe('formatCurrency', () => {
-  it('should format USD amounts correctly', () => {
-    // Arrange
-    const amount = 1234.56;
+describe('AccountsService', () => {
+  let mockHttp: HttpClient;
+  let service: ReturnType<typeof createAccountsService>;
 
-    // Act
-    const result = formatCurrency(amount, 'USD');
-
-    // Assert
-    expect(result).toBe('$1,234.56');
+  beforeEach(() => {
+    mockHttp = {
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      patch: vi.fn(),
+      delete: vi.fn(),
+    };
+    service = createAccountsService(mockHttp);
   });
 
-  it('should handle zero amounts', () => {
-    expect(formatCurrency(0, 'USD')).toBe('$0.00');
+  it('should return list of accounts', async () => {
+    // Arrange
+    const mockAccounts = [{ id: '1', name: 'Cuenta' }];
+    vi.mocked(mockHttp.get).mockResolvedValue({ accounts: mockAccounts });
+
+    // Act
+    const result = await service.getAll();
+
+    // Assert
+    expect(mockHttp.get).toHaveBeenCalledWith('/accounts');
+    expect(result).toEqual(mockAccounts);
   });
 });
 ```
@@ -141,7 +194,7 @@ describe('formatCurrency', () => {
 ### Configuration
 
 ```typescript
-// apps/web-auth/vitest.config.ts
+// apps/web-shell/vitest.config.ts
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
@@ -173,7 +226,7 @@ afterEach(() => {
 ### Component Test Example
 
 ```typescript
-// src/components/LoginForm/LoginForm.test.tsx
+// src/features/auth/components/LoginForm.test.tsx
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -197,18 +250,39 @@ describe('LoginForm', () => {
       password: 'password123',
     });
   });
+});
+```
 
-  it('should show error for invalid email', async () => {
-    // Arrange
-    const user = userEvent.setup();
-    render(<LoginForm onSubmit={vi.fn()} />);
+### Hook Test Example
+
+```typescript
+// src/features/accounts/hooks/useAccounts.test.ts
+import { describe, it, expect, vi } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAccounts } from './useAccounts';
+
+const wrapper = ({ children }) => (
+  <QueryClientProvider client={new QueryClient()}>
+    {children}
+  </QueryClientProvider>
+);
+
+describe('useAccounts', () => {
+  it('should fetch accounts', async () => {
+    // Mock the service
+    vi.mock('@/services', () => ({
+      accountsService: {
+        getAll: vi.fn().mockResolvedValue([{ id: '1', name: 'Cuenta' }]),
+      },
+    }));
 
     // Act
-    await user.type(screen.getByLabelText(/email/i), 'invalid-email');
-    await user.click(screen.getByRole('button', { name: /iniciar sesion/i }));
+    const { result } = renderHook(() => useAccounts(), { wrapper });
 
     // Assert
-    expect(screen.getByText(/email invalido/i)).toBeInTheDocument();
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toHaveLength(1);
   });
 });
 ```
@@ -220,7 +294,7 @@ describe('LoginForm', () => {
 ### Configuration
 
 ```typescript
-// apps/web-auth/playwright.config.ts
+// apps/web-shell/playwright.config.ts
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
@@ -231,13 +305,13 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
   webServer: {
     command: 'pnpm run dev',
-    url: 'http://localhost:3001',
+    url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
   },
 });
@@ -250,7 +324,7 @@ export default defineConfig({
 import { test, expect } from '@playwright/test';
 
 test.describe('Authentication', () => {
-  test('should login successfully with valid credentials', async ({ page }) => {
+  test('should login successfully', async ({ page }) => {
     // Arrange
     await page.goto('/login');
 
@@ -261,7 +335,6 @@ test.describe('Authentication', () => {
 
     // Assert
     await expect(page).toHaveURL('/dashboard');
-    await expect(page.getByText(/bienvenido/i)).toBeVisible();
   });
 });
 ```
@@ -287,34 +360,9 @@ module.exports = {
 };
 ```
 
-### Component Test Example
+### Test IDs for Detox
 
-```typescript
-// src/components/Button/Button.test.tsx
-import { describe, it, expect, jest } from '@jest/globals';
-import { render, screen, fireEvent } from '@testing-library/react-native';
-import { Button } from './Button';
-
-describe('Button', () => {
-  it('should render title correctly', () => {
-    render(<Button title="Continuar" onPress={jest.fn()} />);
-    expect(screen.getByText('Continuar')).toBeOnTheScreen();
-  });
-
-  it('should call onPress when tapped', () => {
-    const onPress = jest.fn();
-    render(<Button title="Continuar" onPress={onPress} />);
-    fireEvent.press(screen.getByText('Continuar'));
-    expect(onPress).toHaveBeenCalledTimes(1);
-  });
-});
-```
-
----
-
-## Test IDs for Mobile
-
-Add testID to components for Detox:
+Add testID to components for E2E testing:
 
 ```typescript
 <TextInput
@@ -335,7 +383,7 @@ Add testID to components for Detox:
 
 | Type | Minimum Coverage |
 |------|------------------|
-| Packages | 80% |
+| Packages (@repo/core) | 80% |
 | Web Components | 70% |
 | Mobile Components | 70% |
 | E2E | Critical paths |
@@ -345,18 +393,21 @@ Add testID to components for Detox:
 ## Commands
 
 ```bash
+# All tests
+pnpm test
+
 # Packages
-pnpm --filter @repo/core test        # Run tests
-pnpm --filter @repo/core test:cov    # With coverage
+pnpm --filter @repo/core test
+pnpm --filter @repo/core test:cov
 
 # Web
-pnpm --filter web-auth test          # Unit tests
-pnpm --filter web-auth test:e2e      # Playwright
+pnpm --filter web-shell test
+pnpm --filter web-shell test:e2e
 
 # Mobile
-pnpm --filter mobile test            # Jest tests
-pnpm --filter mobile test:e2e:ios    # Detox iOS
-pnpm --filter mobile test:e2e:android # Detox Android
+pnpm --filter mobile test
+pnpm --filter mobile test:e2e:ios
+pnpm --filter mobile test:e2e:android
 ```
 
 ---
@@ -371,3 +422,5 @@ pnpm --filter mobile test:e2e:android # Detox Android
 6. **Clean up after tests** - Reset mocks and state between tests
 7. **Keep tests fast** - Mock heavy dependencies
 8. **Name tests clearly** - Use `should [expected behavior] when [condition]`
+9. **Co-locate unit tests** - Keep `*.test.ts` next to source files
+10. **Separate integration tests** - Use `__tests__/integration/` for multi-feature tests
