@@ -107,7 +107,8 @@ pnpm build --filter web-shell
 | `pnpm lint` | Lint all code |
 | `pnpm typecheck` | TypeScript type checking |
 | `pnpm test` | Run tests |
-| `pnpm clean` | Remove node_modules and build artifacts |
+| `pnpm clean` | Remove build artifacts (no reinstall) |
+| `pnpm reset` | Full reset: clean + reinstall dependencies (cross-platform) |
 
 ---
 

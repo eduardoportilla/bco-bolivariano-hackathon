@@ -10,32 +10,36 @@
 
 ---
 
-## Clean Script
+## Reset Script
 
-Reset the project to a clean state when experiencing build issues.
+Full project reset when experiencing build issues (especially cache-related problems like Reanimated worklets).
 
 ```bash
-pnpm clean
+pnpm reset
 ```
 
-**What it removes:**
-- `node_modules`, `dist`, `build`, `coverage`
-- `.turbo`, `.gradle`, `.kotlin`, `Pods`
-- Platform caches (`.expo`, `.next`, `.dart_tool`)
+**What it does (cross-platform):**
+- Clears Watchman cache
+- Removes `node_modules`, `dist`, `build`, `.turbo`, `.gradle`, `.kotlin`
+- Clears Metro and Haste caches
+- **macOS only:** Removes `Pods`, `Podfile.lock`, Xcode DerivedData
+- Reinstalls all dependencies (`pnpm install`)
+- **macOS only:** Runs `pod install --repo-update`
 
 **When to use:**
 - Inexplicable build errors
+- Cache corruption (especially after switching branches or pulling changes)
+- Native module issues (Reanimated, Worklets, etc.)
 - After moving/renaming project
-- Dependency issues
-- Before major releases
 
-**Recovery after clean:**
+**Quick clean (no reinstall):**
 
 ```bash
-pnpm install
-cd apps/mobile/ios && pod install && cd ../../..
-pnpm dev
+pnpm clean                  # Alias for: pnpm reset --no-install
+pnpm reset --no-install     # Explicit flag
 ```
+
+Use `clean` for fast artifact removal without reinstalling dependencies. Both commands use the same script.
 
 ---
 
@@ -62,18 +66,17 @@ cd ..
 pnpm ios
 ```
 
-### Full Clean + Rebuild
+### Full Reset + Rebuild
+
+For persistent issues, run a full reset from the monorepo root:
 
 ```bash
+# From monorepo root
+pnpm reset
+
+# Then rebuild
 cd apps/mobile
-
-# Android
-cd android && ./gradlew clean && cd ..
-pnpm android
-
-# iOS
-cd ios && pod deintegrate && pod install && cd ..
-pnpm ios
+pnpm android  # or pnpm ios
 ```
 
 **Cuando hacer rebuild:**

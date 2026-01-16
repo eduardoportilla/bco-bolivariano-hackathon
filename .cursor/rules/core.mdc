@@ -111,7 +111,8 @@ alwaysApply: true
 - `pnpm typecheck` - Type check
 - `pnpm lint` - Lint all
 - `pnpm test` - Run tests
-- `pnpm clean` - Reset project
+- `pnpm clean` - Remove build artifacts (no reinstall)
+- `pnpm reset` - Full reset with reinstall (use for broken builds)
 
 ## Import Order
 

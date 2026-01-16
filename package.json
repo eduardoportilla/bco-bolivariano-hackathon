@@ -8,9 +8,9 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
-    "clean": "node scripts/clean.js",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "reset:macos": "watchman watch-del-all && find . -name 'node_modules' -type d -prune -exec rm -rf {} + && rm -rf $TMPDIR/metro-* && rm -rf apps/mobile/ios/Pods apps/mobile/ios/Podfile.lock && rm -rf ~/Library/Developer/Xcode/DerivedData && pnpm install && cd apps/mobile/ios && pod install --repo-update"
+    "clean": "node scripts/reset.js --no-install",
+    "reset": "node scripts/reset.js",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "prettier": "^3.7.4",
