@@ -21,6 +21,6 @@ module.exports = mergeConfig(config, {
     blockList: [
       // Exclude Android CMake build directory to prevent Metro watcher crashes
       /android[/\\]app[/\\]\.cxx[/\\]/,
-    ],
+    ].concat(config.resolver?.blockList || []),
   },
 });
