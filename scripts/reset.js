@@ -55,25 +55,6 @@ const filesToRemove = [
   'Podfile.lock',
 ];
 
-// Get Metro cache directory based on platform
-function getMetroCacheDir() {
-  if (isWindows) {
-    return path.join(os.tmpdir(), 'metro-cache');
-  }
-  // macOS/Linux: $TMPDIR or /tmp
-  const tmpDir = process.env.TMPDIR || '/tmp';
-  return tmpDir;
-}
-
-// Get Haste map directory
-function getHasteMapDir() {
-  if (isWindows) {
-    return path.join(os.tmpdir(), 'haste-map');
-  }
-  const tmpDir = process.env.TMPDIR || '/tmp';
-  return tmpDir;
-}
-
 // Execute command safely
 function execSafe(command, options = {}) {
   try {
@@ -150,28 +131,16 @@ function cleanDirectory(dir, targetDirs, targetFiles, skipDirs = ['.git']) {
 function clearMetroCache() {
   console.log('\n[3/6] Clearing Metro cache...');
 
-  const tmpDir = getMetroCacheDir();
-
-  if (isWindows) {
-    // Windows: clear metro-cache directory
-    const metroCachePath = path.join(os.tmpdir(), 'metro-cache');
-    removeDir(metroCachePath);
-
-    // Also check for haste-map
-    const hasteMapPath = path.join(os.tmpdir(), 'haste-map-react-native-packager');
-    removeDir(hasteMapPath);
-  } else {
-    // macOS/Linux: find and remove metro-* and haste-map-* directories
-    try {
-      const tmpEntries = fs.readdirSync(tmpDir);
-      for (const entry of tmpEntries) {
-        if (entry.startsWith('metro-') || entry.startsWith('haste-map-')) {
-          removeDir(path.join(tmpDir, entry));
-        }
+  const tmpDir = os.tmpdir();
+  try {
+    const tmpEntries = fs.readdirSync(tmpDir);
+    for (const entry of tmpEntries) {
+      if (entry.startsWith('metro-') || entry.startsWith('haste-map-')) {
+        removeDir(path.join(tmpDir, entry));
       }
-    } catch (error) {
-      console.log(`  Warning: Could not clean temp directory (${error.message})`);
     }
+  } catch (error) {
+    console.log(`  Warning: Could not clean temp directory (${error.message})`);
   }
 }
 
