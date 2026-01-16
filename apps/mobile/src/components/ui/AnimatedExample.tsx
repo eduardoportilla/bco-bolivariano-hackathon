@@ -59,7 +59,7 @@ export function AnimatedExample({ onRemove }: AnimatedExampleProps) {
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
       <Pressable onPress={handlePress} style={styles.content}>
-        <Text style={styles.emoji}>✨</Text>
+        <Text style={styles.icon}>●</Text>
         <Text style={styles.title}>Reanimated Funciona!</Text>
         <Text style={styles.subtitle}>Toca para animar</Text>
       </Pressable>
@@ -88,9 +88,10 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
   },
-  emoji: {
+  icon: {
     fontSize: 48,
     marginBottom: spacing.sm,
+    color: colors.primary,
   },
   title: {
     fontSize: typography.sizes.lg,

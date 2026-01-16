@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { AuthNavigator } from './AuthNavigator';
 import { MainNavigator } from './MainNavigator';
+import { useAuth } from '../features/auth/hooks';
 
 export function RootNavigator() {
-  // TODO: Replace with actual auth state from store
-  const [isAuthenticated] = useState(false);
+  const { data: user, isLoading } = useAuth();
+  const isAuthenticated = !!user;
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NavigationContainer>
