@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      fb-watchman:
+        specifier: ^2.0.2
+        version: 2.0.2
     devDependencies:
       prettier:
         specifier: ^3.7.4
@@ -7607,7 +7611,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/node@22.19.6)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.2)
+      vitest: 3.2.4(@types/node@22.19.6)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.2)
 
   '@vitest/utils@3.2.4':
     dependencies:
