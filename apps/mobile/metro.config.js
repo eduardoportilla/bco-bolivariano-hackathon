@@ -18,5 +18,10 @@ module.exports = mergeConfig(config, {
     unstable_enableSymlinks: true,
     unstable_enablePackageExports: true,
     disableHierarchicalLookup: true,
+    blockList: [
+      // Exclude Android CMake build directory to prevent Metro watcher crashes
+      /android[/\\]app[/\\]\.cxx[/\\]/,
+      ...(config.resolver?.blockList ?? []),
+    ],
   },
 });
