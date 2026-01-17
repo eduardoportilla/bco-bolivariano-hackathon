@@ -20,7 +20,10 @@ module.exports = mergeConfig(config, {
     disableHierarchicalLookup: true,
     blockList: [
       // Exclude Android CMake build directory to prevent Metro watcher crashes
-      /android[/\\]app[/\\]\.cxx[/\\]/,
+      /\.cxx[/\\].*/,
+      /android[/\\]build[/\\].*/,
+      /android[/\\]app[/\\]build[/\\].*/,
+      /ios[/\\]build[/\\].*/,
     ].concat(config.resolver?.blockList || []),
   },
 });
