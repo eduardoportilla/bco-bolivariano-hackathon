@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { loginSchema, type LoginFormData } from '@repo/core/domains/auth';
 import { Button } from '@repo/ui/components/Button';
 import { Input } from '@repo/ui/components/Input';
@@ -19,7 +19,11 @@ import { useLogin } from './hooks';
  */
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const loginMutation = useLogin();
+
+  // Get the redirect destination (passed by ProtectedRoute)
+  const from = (location.state as { from?: Location })?.from?.pathname ?? '/';
 
   const {
     register,
@@ -32,7 +36,8 @@ export function LoginPage() {
   function onSubmit(data: LoginFormData) {
     loginMutation.mutate(data, {
       onSuccess: () => {
-        navigate('/');
+        // Redirect to the originally requested page
+        navigate(from, { replace: true });
       },
     });
   }

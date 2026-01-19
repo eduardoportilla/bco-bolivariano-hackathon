@@ -7,6 +7,8 @@ import {
   LoginPage,
   ForgotPasswordPage,
   ResetPasswordPage,
+  ProtectedRoute,
+  PublicOnlyRoute,
 } from './features/auth';
 
 // Lazy load microfrontend apps
@@ -99,19 +101,28 @@ export function App() {
         <Route path="/" element={<HomePage />} />
 
         {/* Auth routes (owned by shell - not a microfrontend) */}
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/login"
+          element={
+            <PublicOnlyRoute>
+              <LoginPage />
+            </PublicOnlyRoute>
+          }
+        />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-        {/* Microfrontend routes - lazy loaded with error boundaries */}
+        {/* Protected microfrontend routes - lazy loaded with error boundaries */}
         <Route
           path="/accounts/*"
           element={
-            <RemoteErrorBoundary name="Cuentas" port={3001}>
-              <Suspense fallback={<Loading />}>
-                <AccountsApp />
-              </Suspense>
-            </RemoteErrorBoundary>
+            <ProtectedRoute>
+              <RemoteErrorBoundary name="Cuentas" port={3001}>
+                <Suspense fallback={<Loading />}>
+                  <AccountsApp />
+                </Suspense>
+              </RemoteErrorBoundary>
+            </ProtectedRoute>
           }
         />
       </Routes>

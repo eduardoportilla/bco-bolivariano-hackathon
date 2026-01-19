@@ -21,6 +21,7 @@
     "@tanstack/react-query": "^5.0.0",
     "@types/node": "^22.15.0",
     "eslint": "^9.39.1",
+    "msw": "^2.12.7",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4",
     "zod": "^4.0.0"
@@ -32,6 +33,7 @@
     "./domains/transfers": "./src/domains/transfers/index.ts",
     "./shared": "./src/shared/index.ts",
     "./shared/utils": "./src/shared/utils/index.ts",
-    "./shared/constants": "./src/shared/constants/index.ts"
+    "./shared/constants": "./src/shared/constants/index.ts",
+    "./test/mocks": "./src/test/mocks/index.ts"
   }
 }
