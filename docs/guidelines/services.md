@@ -258,7 +258,7 @@ export const transferSchema = z.object({
   fromAccountId: z.string().min(1, 'Seleccione cuenta origen'),
   toAccountId: z.string().min(1, 'Seleccione cuenta destino'),
   amount: z
-    .number({ invalid_type_error: 'Ingrese un monto valido' })
+    .number({ error: 'Ingrese un monto valido' })  // Zod v4 uses 'error' instead of 'invalid_type_error'
     .positive('El monto debe ser mayor a 0')
     .max(10000, 'Monto maximo excedido'),
   description: z.string().max(100).optional(),
@@ -522,3 +522,123 @@ export const accountService = {
   },
 };
 ```
+
+---
+
+## Mock API Mode (MSW)
+
+The project uses [Mock Service Worker (MSW)](https://mswjs.io/) to enable development without a backend. This provides network-level API mocking that works transparently with all HTTP clients.
+
+### Configuration
+
+Mock mode is controlled via environment variables:
+
+| Platform | Variable | Values |
+|----------|----------|--------|
+| Web | `VITE_API_MOCK` | `true` / `false` |
+| Mobile | `API_MOCK` | `true` / `false` |
+
+### Mock Handlers Location
+
+All MSW handlers are centralized in `@repo/core/test/mocks/`:
+
+```
+packages/core/src/test/mocks/
+├── handlers.ts   # Request handlers for all endpoints
+├── browser.ts    # Web apps (msw/browser)
+├── native.ts     # React Native (msw/native)
+└── index.ts      # Exports
+```
+
+**Why in core?** Since services are defined in `@repo/core`, their mocks live there too. This ensures consistency across all apps and prevents duplication.
+
+### Service Worker Setup (Web Only)
+
+Web apps require the MSW service worker script in the `public/` folder. This is already set up, but if you need to regenerate it:
+
+```bash
+# From app directory
+npx msw init public --save
+```
+
+The `mockServiceWorker.js` file should be committed to the repository.
+
+### Web Apps Setup
+
+```typescript
+// apps/web-*/src/main.tsx
+async function enableMocking() {
+  if (import.meta.env.VITE_API_MOCK !== 'true') {
+    return;
+  }
+
+  // Use platform-specific import to avoid bundling msw/native in web builds
+  const { worker } = await import('@repo/core/test/mocks/browser');
+  return worker.start({ onUnhandledRequest: 'warn' });
+}
+
+enableMocking().then(() => {
+  createRoot(rootElement).render(<App />);
+});
+```
+
+### Mobile App Setup
+
+```typescript
+// apps/mobile/index.js
+import Config from 'react-native-config';
+
+async function enableMocking() {
+  if (!__DEV__ || Config.API_MOCK !== 'true') {
+    return;
+  }
+
+  await import('./msw.polyfills');
+  // Use platform-specific import for React Native
+  const { server } = await import('@repo/core/test/mocks/native');
+  server.listen({ onUnhandledRequest: 'warn' });
+}
+
+enableMocking().then(() => {
+  AppRegistry.registerComponent(appName, () => App);
+});
+```
+
+Mobile requires polyfills (`fast-text-encoding`, `react-native-url-polyfill`) installed as dev dependencies.
+
+### Adding New Mock Handlers
+
+```typescript
+// packages/core/src/test/mocks/handlers.ts
+import { http, HttpResponse } from 'msw';
+
+export const handlers = [
+  // Use wildcard prefix to match any base URL
+  http.get('*/accounts', () => {
+    return HttpResponse.json({ accounts: MOCK_ACCOUNTS });
+  }),
+
+  http.post('*/transfers', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({ id: 'txn-123', ...body }, { status: 201 });
+  }),
+
+  // Return errors for testing
+  http.get('*/error-endpoint', () => {
+    return new HttpResponse(null, { status: 500 });
+  }),
+];
+```
+
+### Development Modes
+
+| Mode | Mock | Backend | Use Case |
+|------|------|---------|----------|
+| **Mock** | `true` | Not required | UI development, offline work, demos |
+| **Real** | `false` | Required | Integration testing, full stack dev |
+
+**Web Real Mode (Shared Cookie):**
+When `VITE_API_MOCK=false`, web apps connect to the real backend. On localhost, auth cookies are shared across ports, so logging in via `web-shell:3000` automatically authenticates `web-accounts:3001`.
+
+**Mobile Real Mode:**
+Set `API_MOCK=false` in `.env` and ensure `API_URL` points to your backend.

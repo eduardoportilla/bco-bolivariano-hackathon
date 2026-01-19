@@ -34,6 +34,8 @@
     "./shared": "./src/shared/index.ts",
     "./shared/utils": "./src/shared/utils/index.ts",
     "./shared/constants": "./src/shared/constants/index.ts",
-    "./test/mocks": "./src/test/mocks/index.ts"
+    "./test/mocks": "./src/test/mocks/index.ts",
+    "./test/mocks/browser": "./src/test/mocks/browser.ts",
+    "./test/mocks/native": "./src/test/mocks/native.ts"
   }
 }

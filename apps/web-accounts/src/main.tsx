@@ -18,9 +18,9 @@ async function enableMocking() {
     return; // Real mode - no mocking
   }
 
-  const { worker } = await import('@repo/core/test/mocks');
+  const { worker } = await import('@repo/core/test/mocks/browser');
   return worker.start({
-    onUnhandledRequest: 'bypass', // Allow non-mocked requests through
+    onUnhandledRequest: 'warn', // Allow non-mocked requests through
   });
 }
 
