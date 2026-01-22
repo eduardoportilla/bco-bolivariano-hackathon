@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
   push:
-    branches: [ "develop" ]
+    branches: [ "main" ]
     # Opcional: Solo activar si hay cambios en carpetas web o paquetes compartidos
     paths:
       - 'apps/web-accounts/**'
@@ -14,7 +14,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "main" ]
 
 jobs:
   build-web:
