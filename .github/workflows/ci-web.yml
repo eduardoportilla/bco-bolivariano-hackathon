@@ -3,7 +3,7 @@ name: Web Micro-frontends CI
 on:
   # Activador manual (El botón de Play)
   workflow_dispatch:
-    
+
   push:
     branches: [ "develop" ]
     # Opcional: Solo activar si hay cambios en carpetas web o paquetes compartidos
@@ -26,8 +26,6 @@ jobs:
       # Setup de PNPM 10
       - name: Instalar pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       # Setup de Node 22
       - name: Configurar Node.js 22
