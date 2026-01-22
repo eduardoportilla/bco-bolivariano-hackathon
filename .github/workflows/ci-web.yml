@@ -1,0 +1,47 @@
+name: Web Micro-frontends CI
+
+on:
+  push:
+    branches: [ "develop" ]
+    # Opcional: Solo activar si hay cambios en carpetas web o paquetes compartidos
+    paths:
+      - 'apps/web-accounts/**'
+      - 'apps/web-shell/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # Setup de PNPM 10
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      # Setup de Node 22
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      # Instalamos dependencias. 
+      # IMPORTANTE: Se instalan todas (incluso mobile) para garantizar la integridad del lockfile,
+      # pero esto es rápido gracias al caché.
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      # AQUÍ ESTÁ EL CAMBIO CLAVE:
+      # Usamos --filter para seleccionar múltiples carpetas.
+      # La sintaxis "..." al final significa "construye esto y sus dependencias del workspace"
+      # (Por ejemplo, si web-shell usa algo de 'packages/ui', lo construirá primero si es necesario).
+      - name: Build Web Micro-frontends
+        run: pnpm --filter "./apps/web-accounts..." --filter "./apps/web-shell..." build
