@@ -3,11 +3,11 @@ name: Monorepo CI (PNPM)
 on:
   # Activador manual (El botón de Play)
   workflow_dispatch:
-    
+
   push:
-    branches: [ "develop" ] # Se activa al subir a la rama develop del remoto 'github'
+    branches: [ "main" ] # Se activa al subir a la rama develop del remoto 'github'
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "main" ]
 
 jobs:
   build-monorepo:
