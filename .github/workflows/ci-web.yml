@@ -1,6 +1,9 @@
 name: Web Micro-frontends CI
 
 on:
+  # Activador manual (El botón de Play)
+  workflow_dispatch:
+    
   push:
     branches: [ "develop" ]
     # Opcional: Solo activar si hay cambios en carpetas web o paquetes compartidos
