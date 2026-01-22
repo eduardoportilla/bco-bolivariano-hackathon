@@ -9,6 +9,21 @@ import './index.css';
 
 const queryClient = createQueryClient();
 
+/**
+ * Enable MSW mocking in development when VITE_API_MOCK is true.
+ * This allows standalone development without a backend.
+ */
+async function enableMocking() {
+  if (import.meta.env.VITE_API_MOCK !== 'true') {
+    return; // Real mode - no mocking
+  }
+
+  const { worker } = await import('@repo/core/test/mocks/browser');
+  return worker.start({
+    onUnhandledRequest: 'warn', // Allow non-mocked requests through
+  });
+}
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error('Root element not found');
@@ -20,14 +35,16 @@ if (!rootElement) {
  * When integrated via Module Federation, the shell provides the router
  * and mounts this at /accounts/*.
  */
-createRoot(rootElement).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  </StrictMode>
-);
+enableMocking().then(() => {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </StrictMode>
+  );
+});

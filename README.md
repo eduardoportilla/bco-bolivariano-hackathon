@@ -29,6 +29,39 @@ pnpm exec playwright install
 
 ---
 
+## Environment Variables
+
+### Mock API Mode
+
+The apps can run without a backend by enabling mock mode. MSW (Mock Service Worker) intercepts all API requests and returns mock data.
+
+| Platform | Variable | File | Values |
+|----------|----------|------|--------|
+| Web | `VITE_API_MOCK` | `.env` | `true` / `false` |
+| Mobile | `API_MOCK` | `.env` | `true` / `false` |
+
+**Setup:**
+
+```bash
+# Web apps (copy and customize)
+cp apps/web-shell/.env.example apps/web-shell/.env
+cp apps/web-accounts/.env.example apps/web-accounts/.env
+
+# Mobile app
+cp apps/mobile/.env.example apps/mobile/.env
+```
+
+**Modes:**
+
+| Mode | Setting | Backend Required | Use Case |
+|------|---------|------------------|----------|
+| Mock | `true` | No | UI development, offline work, demos |
+| Real | `false` | Yes | Integration testing, full stack dev |
+
+> See [services.md](docs/guidelines/services.md#mock-api-mode-msw) for detailed MSW configuration.
+
+---
+
 ## Development
 
 ### Web Microfrontends (Standalone Development)

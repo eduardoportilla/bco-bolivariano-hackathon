@@ -7,15 +7,32 @@ import './index.css';
 
 const queryClient = createQueryClient();
 
+/**
+ * Enable MSW mocking in development when VITE_API_MOCK is true.
+ * This allows development without a backend.
+ */
+async function enableMocking() {
+  if (import.meta.env.VITE_API_MOCK !== 'true') {
+    return; // Real mode - no mocking
+  }
+
+  const { worker } = await import('@repo/core/test/mocks/browser');
+  return worker.start({
+    onUnhandledRequest: 'warn', // Allow non-mocked requests through
+  });
+}
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error('Root element not found');
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </StrictMode>
-);
+enableMocking().then(() => {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </StrictMode>
+  );
+});

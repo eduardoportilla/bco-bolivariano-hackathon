@@ -7,7 +7,7 @@ export const transferSchema = z.object({
   fromAccountId: z.string().min(1, 'Seleccione cuenta origen'),
   toAccountId: z.string().min(1, 'Seleccione cuenta destino'),
   amount: z
-    .number({ invalid_type_error: 'Ingrese un monto valido' })
+    .number({ error: 'Ingrese un monto valido' })
     .positive('El monto debe ser mayor a 0')
     .max(10000, 'Monto maximo $10,000'),
   description: z.string().max(100, 'Maximo 100 caracteres').optional(),
@@ -26,7 +26,7 @@ export const createContactSchema = z.object({
     .max(20, 'Numero de cuenta invalido')
     .regex(/^\d+$/, 'Solo numeros permitidos'),
   accountType: z.enum(['checking', 'savings'], {
-    required_error: 'Seleccione tipo de cuenta',
+    error: 'Seleccione tipo de cuenta',
   }),
   bank: z.string().min(1, 'Seleccione banco'),
   bankCode: z.string().optional(),
