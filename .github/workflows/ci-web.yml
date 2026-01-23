@@ -54,11 +54,24 @@ jobs:
       # ---- PASO ORQUESTACION PARA GITHUB PAGES ---
       # Crear una carpeta public en donde se pondran los micro-frontends
       - name: Preparar carpeta de despliegue
-        run:
-          mkdir public
-          cp -r apps/web-shell/dist/* public/
-          mkdir public/accounts
-          cp -r apps/web-accounts/dist/* public/accounts/
+        run: |
+          # 1. Crear la carpeta raíz del despliegue
+          mkdir -p public
+          
+          # 2. Copiar el Shell a la raíz de public
+          if [ -d "apps/web-shell/dist" ]; then
+            cp -v -r apps/web-shell/dist/* public/
+          else
+            echo "Error: No se encontró apps/web-shell/dist" && exit 1
+          fi
+          
+          # 3. Crear subcarpeta para Accounts y copiar contenido
+          mkdir -p public/accounts
+          if [ -d "apps/web-accounts/dist" ]; then
+            cp -v -r apps/web-accounts/dist/* public/accounts/
+          else
+            echo "Error: No se encontró apps/web-accounts/dist" && exit 1
+          fi
 
       - name: Subir a GitHub Pages
         uses: actions/upload-pages-artifact@v3
