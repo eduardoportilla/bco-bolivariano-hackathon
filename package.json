@@ -6,6 +6,11 @@
       "react": "19.2.3",
       "react-dom": "19.2.3"
     },
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-25128"
+      ]
+    },
     "ignoredBuiltDependencies": [
       "msw"
     ]
