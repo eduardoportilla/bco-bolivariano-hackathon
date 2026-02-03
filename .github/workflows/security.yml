@@ -16,16 +16,7 @@ jobs:
       - name: Horusec Scan (SAST OWASP Top 10)
         run: |
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest
-          
-          # Explicación de flags según tu log:
-          # -p: Directorio actual.
-          # -e: Retorna código 1 (rompe el build) si encuentra algo.
-          # -s: Ignora severidades. Para que falle en HIGH y CRITICAL, 
-          #     le decimos que ignore LOW e INFO.
-          # -D: Deshabilitar Docker (GitHub Runners ya tienen las herramientas instaladas 
-          #     y correrlo sin docker es mucho más rápido).
-          
-          /usr/local/bin/horusec start -p="./" -e="true" -s="LOW, MEDIUM, INFO" -D"
+          /usr/local/bin/horusec start -p="./" -e="true" -s="LOW, MEDIUM, INFO" -D
 
   # 4. Análisis de Secretos (TruffleHog)
   secret-scan:
