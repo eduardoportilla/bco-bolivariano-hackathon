@@ -31,7 +31,7 @@ jobs:
       - name: Horusec Scan (SAST OWASP Top 10)
         run: |
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest
-          /usr/local/bin/horusec start -p="./" -e="true" -s="LOW, MEDIUM, INFO" -D --config-file-path="./horusec-config.json"
+          /usr/local/bin/horusec start -p="./" -e="true" -s="LOW, MEDIUM, INFO" -D --config-file-path="./horusec-config.json" --log-level=debug
 
   # 4. Análisis de Secretos (TruffleHog)
   secret-scan:
