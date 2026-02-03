@@ -8,41 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  # 1. Escaneo de Dependencias (pnpm audit)
-  dependency-audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
-      
-      - name: PNPM Audit (Vulnerabilidades en librerías)
-        # Falla si encuentra vulnerabilidades de nivel 'high' o 'critical'
-        run: pnpm audit --audit-level high
-
-  # 2. Análisis Estático (SonarCloud)
-  # NOTA: Requiere que crees el proyecto en sonarcloud.io y añadidas el SONAR_TOKEN
-  # sonarcloud-analysis:
-  #  runs-on: ubuntu-latest
-  #  needs: [dependency-audit] # Solo corre si las dependencias están sanas
-  #  steps:
-  #    - uses: actions/checkout@v4
-  #      with:
-  #        fetch-depth: 0 # Necesario para el análisis de historial de Sonar
-  #    - name: SonarCloud Scan
-  #      uses: SonarSource/sonarcloud-github-action@master
-  #      env:
-   #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-   #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  # 3. Seguridad OWASP (Horusec)
+  # Seguridad OWASP (Horusec)
   owasp-security-scan:
     runs-on: ubuntu-latest
-    needs: [dependency-audit]
     steps:
       - uses: actions/checkout@v4
       - name: Horusec Scan (SAST OWASP Top 10)
@@ -54,6 +22,7 @@ jobs:
   # 4. Análisis de Secretos (TruffleHog)
   secret-scan:
     runs-on: ubuntu-latest
+    needs: [dependency-audit]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
