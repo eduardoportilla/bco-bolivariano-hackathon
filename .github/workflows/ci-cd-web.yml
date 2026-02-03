@@ -32,6 +32,7 @@ jobs:
         run: pnpm --filter "./apps/web-accounts..." --filter "./apps/web-shell..." build
         env:
           VITE_API_URL: true
+          VITE_API_MOCK: true
 
       # Unimos los microfrontends igual que antes para que vivan en un solo sitio
       - name: Preparar carpeta final

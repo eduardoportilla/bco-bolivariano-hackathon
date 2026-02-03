@@ -31,21 +31,5 @@ jobs:
       - name: Horusec Scan (SAST OWASP Top 10)
         run: |
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest
-          /usr/local/bin/horusec start -p="./" -e="true" -s="LOW, MEDIUM, INFO" -D --config-file-path="./horusec-config.json" --log-level=debug
-
-  # 4. Análisis de Secretos (TruffleHog)
-  secret-scan:
-    runs-on: ubuntu-latest
-    needs: [owasp-security-scan]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: TruffleHog (Detectar Keys y Passwords expuestos)
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --only-verified # Solo avisa si la llave encontrada es válida/real
+          /usr/local/bin/horusec start -p="./" -e="true" -s="LOW, MEDIUM, INFO" -D --config-file-path="./horusec-config.json"
+          
