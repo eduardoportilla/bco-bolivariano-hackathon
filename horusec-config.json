@@ -1,5 +1,5 @@
 {
-  "horusec.analysis.filesOrPathsToIgnore": [
+  "horusecCliFilesOrPathsToIgnore": [
     "**/node_modules/**", 
     "**/dist/**", 
     "**/*.spec.ts", 
