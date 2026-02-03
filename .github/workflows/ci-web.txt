@@ -1,0 +1,83 @@
+name: Web Micro-frontends CI/CD
+
+on:
+  # Activador manual (El botón de Play)
+  workflow_dispatch:
+
+  push:
+    branches: [ "develop" ]
+    # Opcional: Solo activar si hay cambios en carpetas web o paquetes compartidos
+    paths:
+      - 'apps/web-accounts/**'
+      - 'apps/web-shell/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [ "develop" ]
+# Permisos necesarios para que el robot escriba en GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # Setup de PNPM 10
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+
+      # Setup de Node 22
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      # Instalamos dependencias. 
+      # IMPORTANTE: Se instalan todas (incluso mobile) para garantizar la integridad del lockfile,
+      # pero esto es rápido gracias al caché.
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      # AQUÍ ESTÁ EL CAMBIO CLAVE:
+      # Usamos --filter para seleccionar múltiples carpetas.
+      # La sintaxis "..." al final significa "construye esto y sus dependencias del workspace"
+      # (Por ejemplo, si web-shell usa algo de 'packages/ui', lo construirá primero si es necesario).
+      - name: Build Web Micro-frontends
+        run: pnpm --filter "./apps/web-accounts..." --filter "./apps/web-shell..." build
+      
+      # ---- PASO ORQUESTACION PARA GITHUB PAGES ---
+      # Crear una carpeta public en donde se pondran los micro-frontends
+      - name: Preparar carpeta de despliegue
+        run: |
+          # 1. Crear la carpeta raíz del despliegue
+          mkdir -p public
+          
+          # 2. Copiar el Shell a la raíz de public
+          if [ -d "apps/web-shell/dist" ]; then
+            cp -v -r apps/web-shell/dist/* public/
+          else
+            echo "Error: No se encontró apps/web-shell/dist" && exit 1
+          fi
+          
+          # 3. Crear subcarpeta para Accounts y copiar contenido
+          mkdir -p public/accounts
+          if [ -d "apps/web-accounts/dist" ]; then
+            cp -v -r apps/web-accounts/dist/* public/accounts/
+          else
+            echo "Error: No se encontró apps/web-accounts/dist" && exit 1
+          fi
+
+      - name: Subir a GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+      - name: Desplegar
+        id: deployment
+        uses: actions/deploy-pages@v4

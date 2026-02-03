@@ -1,0 +1,39 @@
+name: Monorepo CI (PNPM)
+
+on:
+  # Activador manual (El botón de Play)
+  workflow_dispatch:
+
+  push:
+    branches: [ "main" ] # Se activa al subir a la rama develop del remoto 'github'
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-monorepo:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Bajamos el código
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 2. Instalamos PNPM (Es importante hacerlo ANTES de Node para que el caché funcione bien)
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+
+      # 3. Configuramos Node.js 22 y activamos el caché de pnpm
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      # 4. Instalamos dependencias (de todo el monorepo)
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      # 5. Compilamos TODO el workspace (Apps y Packages)
+      # La bandera -r (recursive) busca el script 'build' en todos los package.json
+      - name: Build de todo el workspace
+        run: pnpm -r build

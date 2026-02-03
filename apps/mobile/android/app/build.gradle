@@ -6,10 +6,16 @@ apply plugin: "com.facebook.react"
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
+def reactRoot = file("../..")
+def nodeModules = file("../../../../node_modules")
+def osBin = System.getProperty("os.name").toLowerCase().contains("win") ? "win64-bin" :
+    (System.getProperty("os.name").toLowerCase().contains("mac") ? "osx-bin" : "linux64-bin")
+def hermescPath = file("${nodeModules}/hermes-compiler/hermesc/${osBin}/hermesc")
+
 react {
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
-    root = file("../..")
+    root = reactRoot
     //   The folder where the react-native NPM package is. Default is ../../node_modules/react-native
     reactNativeDir = file("../../../../node_modules/react-native")
     //   The folder where the react-native Codegen package is. Default is ../../node_modules/@react-native/codegen
@@ -44,8 +50,8 @@ react {
     // extraPackagerArgs = []
 
     /* Hermes Commands */
-    //   The hermes compiler command to run. By default it is 'hermesc'
-    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
+    //   Monorepo: hermesc from root node_modules (CI/Linux and local)
+    hermesCommand = hermescPath.absolutePath
     //
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
     // hermesFlags = ["-O", "-output-source-map"]
