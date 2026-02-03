@@ -41,7 +41,7 @@ jobs:
           mkdir -p deploy
           cp -r apps/web-shell/dist/* deploy/
           mkdir -p deploy/accounts
-          cp -r apps/web-accounts/dist/* deploy/accounts/
+          cp -r apps/web-accounts/dist/* deploy/_mf/accounts/
 
       # DESPLIEGUE A AZURE
       - name: Deploy to Azure
