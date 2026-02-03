@@ -8,9 +8,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Escaneo de Dependencias (pnpm audit)
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      
+      - name: PNPM Audit (Vulnerabilidades en librerías)
+        # Falla si encuentra vulnerabilidades de nivel 'high' o 'critical'
+        run: pnpm audit --prod --audit-level high
   # Seguridad OWASP (Horusec)
   owasp-security-scan:
     runs-on: ubuntu-latest
+    needs: [dependency-audit]
     steps:
       - uses: actions/checkout@v4
       - name: Horusec Scan (SAST OWASP Top 10)
