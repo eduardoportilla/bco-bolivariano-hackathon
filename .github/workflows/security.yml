@@ -16,8 +16,12 @@ jobs:
       - name: Horusec Scan (SAST OWASP Top 10)
         run: |
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest
-          # Ejecuta el análisis y falla si hay severidades Críticas o Altas
-          /usr/local/bin/horusec start -p="./" --high-severity-error="true" --critical-severity-error="true"
+          
+          # Flags corregidos para la v2.8.0+:
+          # -p: indica el path (directorio actual)
+          # -e: activa el retorno de error si encuentra vulnerabilidades
+          # --error-status-level: define desde qué nivel de severidad el build debe fallar
+          /usr/local/bin/horusec start -p="./" -e="true" --error-status-level="high"
 
   # 4. Análisis de Secretos (TruffleHog)
   secret-scan:
