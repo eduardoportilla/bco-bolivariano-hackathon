@@ -5,7 +5,7 @@ import axios, {
   type InternalAxiosRequestConfig,
   type AxiosResponse,
 } from 'axios';
-import type { HttpClient, HttpError } from './http.adapter';
+import type { HttpClient, HttpError, RequestConfig } from './http.adapter';
 
 /**
  * Configuration options for creating an HTTP client.
@@ -64,6 +64,7 @@ const DEFAULT_CONFIG: Partial<HttpClientConfig> = {
   withCredentials: false,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
 };
 
@@ -148,29 +149,34 @@ export function createHttpClient(
 ): HttpClient {
   const instance = createAxiosInstance(config, interceptors);
 
+  const toAxiosConfig = (config?: RequestConfig): AxiosRequestConfig | undefined => {
+    if (!config?.headers) return undefined;
+    return { headers: config.headers };
+  };
+
   return {
-    get: async <T>(url: string): Promise<T> => {
-      const response = await instance.get<T>(url);
+    get: async <T>(url: string, config?: RequestConfig): Promise<T> => {
+      const response = await instance.get<T>(url, toAxiosConfig(config));
       return response.data;
     },
 
-    post: async <T>(url: string, data?: unknown): Promise<T> => {
-      const response = await instance.post<T>(url, data);
+    post: async <T>(url: string, data?: unknown, config?: RequestConfig): Promise<T> => {
+      const response = await instance.post<T>(url, data, toAxiosConfig(config));
       return response.data;
     },
 
-    put: async <T>(url: string, data?: unknown): Promise<T> => {
-      const response = await instance.put<T>(url, data);
+    put: async <T>(url: string, data?: unknown, config?: RequestConfig): Promise<T> => {
+      const response = await instance.put<T>(url, data, toAxiosConfig(config));
       return response.data;
     },
 
-    patch: async <T>(url: string, data?: unknown): Promise<T> => {
-      const response = await instance.patch<T>(url, data);
+    patch: async <T>(url: string, data?: unknown, config?: RequestConfig): Promise<T> => {
+      const response = await instance.patch<T>(url, data, toAxiosConfig(config));
       return response.data;
     },
 
-    delete: async <T>(url: string): Promise<T> => {
-      const response = await instance.delete<T>(url);
+    delete: async <T>(url: string, config?: RequestConfig): Promise<T> => {
+      const response = await instance.delete<T>(url, toAxiosConfig(config));
       return response.data;
     },
   };
