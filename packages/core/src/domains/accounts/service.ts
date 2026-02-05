@@ -1,5 +1,7 @@
 import type { HttpClient } from '../../adapters';
 import { API_ENDPOINTS } from '../../shared/constants';
+import type { AccountElement } from '../auth/auth-db.reponse';
+import { AccountsMapper } from './mappers';
 import type { Account, AccountBalance, Transaction, TransactionFilters } from './types';
 
 /**
@@ -18,8 +20,8 @@ export interface AccountsService {
 export function createAccountsService(http: HttpClient): AccountsService {
   return {
     getAll: async () => {
-      const response = await http.get<{ accounts: Account[] }>(API_ENDPOINTS.accounts.list);
-      return response?.accounts ?? [];
+      const response = await http.get<{ accounts: AccountElement[] }>(API_ENDPOINTS.accounts.list);
+      return AccountsMapper.toAccountList(response?.accounts ?? []);
     },
 
     getById: (id: string) => {

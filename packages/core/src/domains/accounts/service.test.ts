@@ -1,13 +1,49 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { HttpClient } from '../../adapters';
+import { BeneficiaryTypeCode, DocumentType } from '../auth/auth-db.reponse';
+import type { AccountElement } from '../auth/auth-db.reponse';
 import { createAccountsService } from './service';
 import type { Account, AccountBalance } from './types';
+
+const MAPPED_CREATED_AT = '1970-01-01T00:00:00Z';
+
+function buildMockAccountElement(overrides: Partial<AccountElement> = {}): AccountElement {
+  return {
+    accountId: 1,
+    accountIdentifier: '1',
+    accountNumber: '1234567890',
+    allowDownloadStatements: false,
+    accountTypeCode: DocumentType.C,
+    accountType: 'checking',
+    accountTypeLabel: 'Corriente',
+    accountOwnerName: 'Owner',
+    accountAliasName: 'Cuenta Corriente',
+    relationTypeCode: '',
+    isFavorite: true,
+    balances: [
+      { balanceType: 'TOTAL', amount: 5000, currency: 'USD' },
+      { balanceType: 'AVAILABLE', amount: 4500, currency: 'USD' },
+    ],
+    transactionType: '',
+    allowAdditionalCard: false,
+    allowNewCard: false,
+    allowBalanceDebit: true,
+    allowBalanceCredit: true,
+    institutionCode: '',
+    institutionName: '',
+    beneficiaryTypeCode: BeneficiaryTypeCode.OwnerBankAccount,
+    typeTransactionConfigurations: [],
+    scheduledSaving: [],
+    predefinedAmounts: { '$ 10': 0, '$ 20': 0, '$ 30': 0, '$ 100': 0 },
+    ...overrides,
+  };
+}
 
 describe('AccountsService', () => {
   let mockHttp: HttpClient;
   let accountsService: ReturnType<typeof createAccountsService>;
 
-  const mockAccount: Account = {
+  const expectedMappedAccount: Account = {
     id: '1',
     name: 'Cuenta Corriente',
     number: '1234567890',
@@ -16,7 +52,7 @@ describe('AccountsService', () => {
     availableBalance: 4500,
     currency: 'USD',
     isPrimary: true,
-    createdAt: '2024-01-01T00:00:00Z',
+    createdAt: MAPPED_CREATED_AT,
   };
 
   beforeEach(() => {
@@ -31,31 +67,31 @@ describe('AccountsService', () => {
   });
 
   describe('getAll', () => {
-    it('should return list of accounts', async () => {
+    it('should return list of accounts mapped from AccountElement', async () => {
       // Arrange
-      const mockAccounts = [mockAccount];
-      vi.mocked(mockHttp.get).mockResolvedValue({ accounts: mockAccounts });
+      const mockAccountElements: AccountElement[] = [buildMockAccountElement()];
+      vi.mocked(mockHttp.get).mockResolvedValue({ accounts: mockAccountElements });
 
       // Act
       const result = await accountsService.getAll();
 
       // Assert
       expect(mockHttp.get).toHaveBeenCalledWith('/accounts');
-      expect(result).toEqual(mockAccounts);
+      expect(result).toEqual([expectedMappedAccount]);
     });
   });
 
   describe('getById', () => {
     it('should return single account by id', async () => {
       // Arrange
-      vi.mocked(mockHttp.get).mockResolvedValue(mockAccount);
+      vi.mocked(mockHttp.get).mockResolvedValue(expectedMappedAccount);
 
       // Act
       const result = await accountsService.getById('1');
 
       // Assert
       expect(mockHttp.get).toHaveBeenCalledWith('/accounts/1');
-      expect(result).toEqual(mockAccount);
+      expect(result).toEqual(expectedMappedAccount);
     });
   });
 
