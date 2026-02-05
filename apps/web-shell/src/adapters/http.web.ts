@@ -3,6 +3,8 @@ import { createHttpClient } from '@repo/core/adapters';
 /**
  * Web HTTP client implementation.
  * Uses Axios with httpOnly cookie authentication.
+ * 401 is not redirected here to avoid full page reload; auth state is handled by
+ * useAuth and ProtectedRoute (redirect to /login when unauthenticated).
  */
 export const httpClient = createHttpClient(
   {
@@ -11,9 +13,6 @@ export const httpClient = createHttpClient(
   },
   {
     onError: (error) => {
-      if (error.response?.status === 401) {
-        window.location.href = '/login';
-      }
       return Promise.reject(error.response?.data ?? error);
     },
   }

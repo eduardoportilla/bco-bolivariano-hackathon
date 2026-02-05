@@ -73,6 +73,11 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
 ];
 
 /**
+ * Mock session state: when false, GET /auth/me returns 401 so login flow can be tested.
+ */
+let mockSessionActive = true;
+
+/**
  * MSW request handlers for mocking API endpoints.
  * Use wildcard (*) prefix to match any base URL.
  */
@@ -81,11 +86,15 @@ export const handlers = [
 
   // GET /auth/me - Get current user
   http.get('*/auth/me', () => {
+    if (!mockSessionActive) {
+      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
     return HttpResponse.json(MOCK_USER);
   }),
 
   // POST /auth/login - Login
   http.post('*/auth/login', async () => {
+    mockSessionActive = true;
     const response: AuthResponse = {
       user: MOCK_USER,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
@@ -93,13 +102,18 @@ export const handlers = [
     return HttpResponse.json(response);
   }),
 
-  // POST /auth/logout - Logout
-  http.post('*/auth/logout', () => {
-    return new HttpResponse(null, { status: 204 });
-  }),
+  // POST /auth/logout - Logout (predicate matches any path ending in /auth/logout for any baseURL)
+  http.post(
+    ({ request }) => new URL(request.url).pathname.endsWith('/auth/logout'),
+    () => {
+      mockSessionActive = false;
+      return new HttpResponse(null, { status: 204 });
+    }
+  ),
 
   // POST /auth/register - Register
   http.post('*/auth/register', async () => {
+    mockSessionActive = true;
     const response: AuthResponse = {
       user: MOCK_USER,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
