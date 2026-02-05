@@ -384,6 +384,17 @@ src/hooks/
 
 ## Microfrontends (Module Federation)
 
+### Runtime Modes
+
+Each MFE has two runtime modes:
+
+- **Standalone:** `main.tsx` runs the MFE as a full SPA with its own `BrowserRouter` (for dev/testing)
+- **Federated:** Shell imports only `App.tsx` via Module Federation; `main.tsx` is never executed
+
+In federated mode, the shell's `BrowserRouter` provides router context. The MFE's `App.tsx` must use only `<Routes>`, never `<BrowserRouter>`.
+
+> **Reference:** See `docs/resources/references/mfe-runtime-modes.md` for detailed explanation, common pitfalls, and checklist.
+
 ### Routing Strategy (Hybrid Approach)
 
 - **Shell owns:** Top-level routing, auth routes (cross-cutting concern), browser history
