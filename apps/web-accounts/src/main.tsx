@@ -40,7 +40,7 @@ enableMocking().then(() => {
     <StrictMode>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
+          <BrowserRouter basename={import.meta.env.BASE_URL || '/'}>
             <App />
           </BrowserRouter>
         </QueryClientProvider>
