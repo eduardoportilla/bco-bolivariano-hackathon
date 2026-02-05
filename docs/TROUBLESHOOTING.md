@@ -88,6 +88,20 @@ pnpm android  # or pnpm ios
 
 ## Web Microfrontends
 
+### Shared Dependencies Mismatch
+
+**Issue:** Remote MFE crashes with errors like:
+- `Invalid hook call` or hooks not working across host/remote boundary
+- `Cannot read properties of null` on React internals
+- Multiple instances of React detected
+- React Query context `undefined` in remote components
+
+**Cause:** The `shared` config in `vite.config.ts` is out of sync between shell and remote(s). If a dependency is missing `singleton: true` or is listed in one config but not the other, Module Federation loads separate instances.
+
+**Solution:** Ensure the `shared` block is **identical** in shell and all remotes. See `docs/guidelines/architecture.md` > Shared Dependencies for the correct config and rules.
+
+---
+
 ### React Compiler + Module Federation Incompatibility
 
 **Issue:** When using React Compiler (`babel-plugin-react-compiler`) with Module Federation, remote components fail with:

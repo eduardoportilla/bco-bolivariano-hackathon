@@ -408,9 +408,14 @@ Auth is not a separate microfrontend because it's infrastructure, not a business
 federation({
   name: 'shell',
   remotes: {
-    webAccounts: 'http://localhost:3001/assets/remoteEntry.js',
+    webAccounts: `${process.env.REMOTE_WEB_ACCOUNTS_URL || 'http://localhost:3001'}/assets/remoteEntry.js`,
   },
-  shared: ['react', 'react-dom', 'react-router-dom', 'zustand'],
+  shared: {
+    react: { singleton: true, requiredVersion: false },
+    'react-dom': { singleton: true, requiredVersion: false },
+    'react-router-dom': { singleton: true, requiredVersion: false },
+    '@tanstack/react-query': { singleton: true, requiredVersion: false },
+  } as FederationSharedDeps,
 })
 ```
 
@@ -423,7 +428,12 @@ federation({
   exposes: {
     './App': './src/App.tsx',  // Exposes App with internal router
   },
-  shared: ['react', 'react-dom', 'react-router-dom', 'zustand'],
+  shared: {
+    react: { singleton: true, requiredVersion: false },
+    'react-dom': { singleton: true, requiredVersion: false },
+    'react-router-dom': { singleton: true, requiredVersion: false },
+    '@tanstack/react-query': { singleton: true, requiredVersion: false },
+  } as FederationSharedDeps,
 })
 
 // apps/web-accounts/src/App.tsx
@@ -463,6 +473,20 @@ function App() {
   );
 }
 ```
+
+### Shared Dependencies
+
+Shell and remotes **must** declare the same `shared` block with identical settings (see configs above).
+
+| Option | Purpose |
+|--------|---------|
+| `singleton: true` | Forces one instance across host and remotes (prevents duplicate React, broken hooks/context) |
+| `requiredVersion: false` | Avoids version mismatch errors when minor versions differ between apps |
+
+**Rules:**
+- The `shared` config must be **identical** in shell and all remotes
+- When adding a new shared dependency, update **every** federation config (shell + all remotes)
+- Only share libraries that manage global state or context (React, router, query client). Don't share utility libraries like `date-fns` or `zod`
 
 ---
 

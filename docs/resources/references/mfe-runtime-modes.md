@@ -67,57 +67,13 @@ Shell's BrowserRouter -> Route path="/accounts/*" -> App.tsx -> Routes
 
 ### How It Works
 
-The shell lazy-loads the remote's `App.tsx` component:
+The federation config only exposes `App.tsx` (not `main.tsx`). When the shell imports `webAccounts/App`, it gets the `App` component directly -- the shell's `BrowserRouter` provides the router context, and the wildcard `/*` in the shell's route allows the remote to handle its own sub-routes.
 
-```typescript
-// apps/web-shell/src/App.tsx
-const AccountsApp = lazy(() => import('webAccounts/App'));
+Key rules for `App.tsx`:
+- Use only `<Routes>`, **never** `<BrowserRouter>`
+- Route paths are relative (e.g., `:id`, not `/accounts/:id`)
 
-<Route
-  path="/accounts/*"
-  element={
-    <ProtectedRoute>
-      <Suspense fallback={<Loading />}>
-        <AccountsApp />
-      </Suspense>
-    </ProtectedRoute>
-  }
-/>
-```
-
-The remote's `App.tsx` uses only `<Routes>`, **not** `<BrowserRouter>`:
-
-```typescript
-// apps/web-accounts/src/App.tsx
-export function App() {
-  return (
-    <Routes>
-      <Route index element={<AccountsListPage />} />
-      <Route path=":id" element={<AccountDetailsPage />} />
-      <Route path=":id/movements" element={<AccountMovementsPage />} />
-    </Routes>
-  );
-}
-```
-
-The shell's `BrowserRouter` provides the router context. The wildcard `/*` in `path="/accounts/*"` allows the remote to handle its own sub-routes.
-
----
-
-## Why `main.tsx` Is Not Executed in Federated Mode
-
-The federation config in `vite.config.ts` only exposes `App.tsx`:
-
-```typescript
-federation({
-  name: 'webAccounts',
-  exposes: {
-    './App': './src/App.tsx',  // Only App.tsx, not main.tsx
-  },
-})
-```
-
-When the shell imports `webAccounts/App`, it gets the `App` component directly. The `main.tsx` file (which contains `BrowserRouter`, `createRoot`, providers, etc.) is only used when the MFE is opened directly in a browser as a standalone SPA.
+> See `docs/guidelines/architecture.md` > Microfrontends for full Shell, Remote, and Loading Remotes config examples.
 
 ---
 
