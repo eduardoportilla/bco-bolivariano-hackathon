@@ -1,6 +1,32 @@
 import { http, HttpResponse } from 'msw';
-import type { User, AuthResponse } from '../../domains/auth/types';
+import type { User } from '../../domains/auth/types';
 import type { Account, Transaction } from '../../domains/accounts/types';
+
+/**
+ * Builds AuthResponseBD-shaped payload for login/register so AuthMapper.toAuthResponse works.
+ */
+function mockAuthResponseBD(user: User): Record<string, unknown> {
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  return {
+    code: 200,
+    responseType: 'success',
+    message: 'OK',
+    content: {
+      infoUser: {
+        documentNumber: user.id,
+        email: user.email,
+        fullName: user.name,
+        phoneNumber: user.phone ?? '',
+        urlProfileImage: user.avatarUrl ?? '',
+        userAlias: '',
+        documentType: 'C',
+        username: user.email,
+        lastSession: new Date().toISOString(),
+      },
+      accessToken: expiresAt,
+    },
+  };
+}
 
 /**
  * Mock user for development.
@@ -92,14 +118,10 @@ export const handlers = [
     return HttpResponse.json(MOCK_USER);
   }),
 
-  // POST /auth/login - Login
+  // POST /auth/login - Login (AuthResponseBD shape for AuthMapper.toAuthResponse)
   http.post('*/auth/login', async () => {
     mockSessionActive = true;
-    const response: AuthResponse = {
-      user: MOCK_USER,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
-    };
-    return HttpResponse.json(response);
+    return HttpResponse.json(mockAuthResponseBD(MOCK_USER));
   }),
 
   // POST /auth/logout - Logout (predicate matches any path ending in /auth/logout for any baseURL)
@@ -111,14 +133,10 @@ export const handlers = [
     }
   ),
 
-  // POST /auth/register - Register
+  // POST /auth/register - Register (AuthResponseBD shape for AuthMapper.toAuthResponse)
   http.post('*/auth/register', async () => {
     mockSessionActive = true;
-    const response: AuthResponse = {
-      user: MOCK_USER,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    };
-    return HttpResponse.json(response, { status: 201 });
+    return HttpResponse.json(mockAuthResponseBD(MOCK_USER), { status: 201 });
   }),
 
   // POST /auth/refresh - Refresh token
