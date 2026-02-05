@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import federation, { type Shared as FederationSharedDeps } from '@originjs/vite-plugin-federation';
 
 export default defineConfig({
+  base: process.env.REMOTE_WEB_ACCOUNTS_BASE_PATH || '/', // Always include trailing slash (e.g. /accounts/)
   plugins: [
     tailwindcss(),
     react(),

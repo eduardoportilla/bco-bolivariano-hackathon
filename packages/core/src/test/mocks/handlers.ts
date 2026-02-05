@@ -1,4 +1,9 @@
 import { http, HttpResponse } from 'msw';
+import {
+  BeneficiaryTypeCode,
+  DocumentType,
+  type AccountElement,
+} from '../../domains/auth/auth-db.reponse';
 import type { User } from '../../domains/auth/types';
 import type { Account, Transaction } from '../../domains/accounts/types';
 
@@ -40,7 +45,7 @@ export const MOCK_USER: User = {
 };
 
 /**
- * Mock accounts for development.
+ * Mock accounts for development (domain shape).
  */
 export const MOCK_ACCOUNTS: Account[] = [
   {
@@ -66,6 +71,46 @@ export const MOCK_ACCOUNTS: Account[] = [
     createdAt: '2024-02-01T00:00:00.000Z',
   },
 ];
+
+const DEFAULT_PREDEFINED_AMOUNTS = { '$ 10': 0, '$ 20': 0, '$ 30': 0, '$ 100': 0 };
+
+/**
+ * Builds AccountElement (BD shape) from domain Account for GET /accounts so AccountsMapper is used.
+ */
+function accountToAccountElement(account: Account, index: number): AccountElement {
+  return {
+    accountId: index + 1,
+    accountIdentifier: account.id,
+    accountNumber: account.number,
+    allowDownloadStatements: false,
+    accountTypeCode: account.type === 'savings' ? DocumentType.A : DocumentType.C,
+    accountType: account.type,
+    accountTypeLabel: account.type === 'savings' ? 'Ahorros' : 'Corriente',
+    accountOwnerName: '',
+    accountAliasName: account.name,
+    relationTypeCode: '',
+    isFavorite: account.isPrimary,
+    balances: [
+      { balanceType: 'TOTAL', amount: account.balance, currency: account.currency },
+      {
+        balanceType: 'AVAILABLE',
+        amount: account.availableBalance,
+        currency: account.currency,
+      },
+    ],
+    transactionType: '',
+    allowAdditionalCard: false,
+    allowNewCard: false,
+    allowBalanceDebit: true,
+    allowBalanceCredit: true,
+    institutionCode: '',
+    institutionName: '',
+    beneficiaryTypeCode: BeneficiaryTypeCode.OwnerBankAccount,
+    typeTransactionConfigurations: [],
+    scheduledSaving: [],
+    predefinedAmounts: DEFAULT_PREDEFINED_AMOUNTS,
+  };
+}
 
 /**
  * Mock transactions for development.
@@ -148,9 +193,10 @@ export const handlers = [
 
   // ==================== Accounts Endpoints ====================
 
-  // GET /accounts - List accounts
+  // GET /accounts - List accounts (BD shape so AccountsMapper.toAccountList is used)
   http.get('*/accounts', () => {
-    return HttpResponse.json({ accounts: MOCK_ACCOUNTS });
+    const accountElements = MOCK_ACCOUNTS.map(accountToAccountElement);
+    return HttpResponse.json({ accounts: accountElements });
   }),
 
   // GET /accounts/:id - Get account by ID
