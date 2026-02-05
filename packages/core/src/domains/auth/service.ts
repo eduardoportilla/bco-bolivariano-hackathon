@@ -1,6 +1,8 @@
 import type { HttpClient } from '../../adapters';
 import { API_ENDPOINTS } from '../../shared/constants';
 import type { User, LoginCredentials, RegisterData, AuthResponse, RefreshResponse } from './types';
+import type { AuthResponseBD } from './auth-db.reponse';
+import { AuthMapper } from './mappers';
 
 /**
  * Auth service type definition.
@@ -18,16 +20,18 @@ export interface AuthService {
  */
 export function createAuthService(http: HttpClient): AuthService {
   return {
-    login: (credentials: LoginCredentials) => {
-      return http.post<AuthResponse>(API_ENDPOINTS.auth.login, credentials);
+    login: async (credentials: LoginCredentials) => {
+      const response = await http.post<AuthResponseBD>(API_ENDPOINTS.auth.login, credentials);
+      return AuthMapper.toAuthResponse(response);
     },
 
     logout: () => {
       return http.post<void>(API_ENDPOINTS.auth.logout);
     },
 
-    register: (data: RegisterData) => {
-      return http.post<AuthResponse>(API_ENDPOINTS.auth.register, data);
+    register: async (data: RegisterData) => {
+      const response = await http.post<AuthResponseBD>(API_ENDPOINTS.auth.register, data);
+      return AuthMapper.toAuthResponse(response);
     },
 
     refresh: () => {

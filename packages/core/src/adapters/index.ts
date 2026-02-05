@@ -1,4 +1,4 @@
-export type { HttpClient, HttpError } from './http.adapter';
+export type { HttpClient, HttpError, RequestConfig } from './http.adapter';
 export { isHttpError } from './http.adapter';
 
 export type { HttpClientConfig, HttpClientInterceptors } from './http.factory';

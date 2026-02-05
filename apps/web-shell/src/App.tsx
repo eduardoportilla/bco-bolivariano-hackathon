@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@repo/ui/components/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/Card';
 import { RemoteErrorBoundary } from '@repo/ui/components/ErrorBoundary';
@@ -9,6 +9,8 @@ import {
   ResetPasswordPage,
   ProtectedRoute,
   PublicOnlyRoute,
+  useAuth,
+  useLogout,
 } from './features/auth';
 
 // Lazy load microfrontend apps
@@ -18,21 +20,56 @@ const AccountsApp = lazy(() => import('webAccounts/App'));
  * Home page component.
  */
 function HomePage() {
+  const navigate = useNavigate();
+  const { data: user, isLoading } = useAuth();
+  const logoutMutation = useLogout();
+
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => navigate('/'),
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold">Banco Bolivariano</h1>
-          <nav className="flex gap-4">
+          <nav className="flex items-center gap-4">
             <Link to="/">
               <Button variant="ghost">Inicio</Button>
             </Link>
             <Link to="/accounts">
               <Button variant="ghost">Cuentas</Button>
             </Link>
-            <Link to="/login">
-              <Button>Ingresar</Button>
-            </Link>
+            {isLoading ? (
+              <span className="text-sm text-muted-foreground">Verificando...</span>
+            ) : user ? (
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Conectado como</p>
+                  <p
+                    className="text-sm font-medium truncate max-w-[180px]"
+                    title={user.email}
+                  >
+                    {user.name}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending}
+                >
+                  {logoutMutation.isPending ? 'Saliendo...' : 'Cerrar sesión'}
+                </Button>
+              </div>
+            ) : (
+              <Link to="/login">
+                <Button>Ingresar</Button>
+              </Link>
+            )}
           </nav>
         </div>
       </header>
