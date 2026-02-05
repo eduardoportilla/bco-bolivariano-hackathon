@@ -7,7 +7,7 @@ export interface User {
   name: string;
   phone?: string;
   avatarUrl?: string;
-  createdAt: string;
+  createdAt?: string;
   lastLoginAt?: string;
 }
 
