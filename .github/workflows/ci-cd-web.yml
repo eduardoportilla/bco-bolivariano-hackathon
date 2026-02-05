@@ -34,6 +34,7 @@ jobs:
           VITE_API_URL: true
           VITE_API_MOCK: ${{ vars.VITE_API_MOCK }}
           REMOTE_WEB_ACCOUNTS_URL: ${{ vars.REMOTE_WEB_ACCOUNTS_URL }}
+          REMOTE_WEB_ACCOUNTS_BASE_PATH: ${{ vars.REMOTE_WEB_ACCOUNTS_BASE_PATH }}
 
       # Unimos los microfrontends igual que antes para que vivan en un solo sitio
       - name: Preparar carpeta final
