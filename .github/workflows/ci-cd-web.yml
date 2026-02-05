@@ -39,6 +39,7 @@ jobs:
       - name: Preparar carpeta final
         run: |
           mkdir -p deploy
+          cp staticwebapp.config.json deploy/
           cp -r apps/web-shell/dist/* deploy/
           mkdir -p deploy/_mfe/accounts
           cp -r apps/web-accounts/dist/* deploy/_mfe/accounts/
