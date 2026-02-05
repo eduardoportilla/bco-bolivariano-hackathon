@@ -3,8 +3,21 @@
     "rewrite": "/index.html",
     "exclude": [
       "/assets/*",
-      "/_mfe/*/assets/*",
-      "/*.{css,js,json,jpg,jpeg,png,webp,gif,svg,ico,woff,woff2,ttf,eot}"
+      "/_mfe/accounts/assets/*",
+      "*.css",
+      "*.js",
+      "*.json",
+      "*.jpg",
+      "*.jpeg",
+      "*.png",
+      "*.webp",
+      "*.gif",
+      "*.svg",
+      "*.ico",
+      "*.woff",
+      "*.woff2",
+      "*.ttf",
+      "*.eot"
     ]
   }
 }
