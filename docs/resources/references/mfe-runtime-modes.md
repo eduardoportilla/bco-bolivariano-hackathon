@@ -29,12 +29,14 @@ main.tsx -> BrowserRouter (with basename) -> App.tsx -> Routes
 
 ```typescript
 // apps/web-accounts/src/main.tsx
+import { getRouterBasename } from '@repo/core/shared/utils';
+
 enableMocking().then(() => {
   createRoot(rootElement).render(
     <StrictMode>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <BrowserRouter basename={getRouterBasename(import.meta.env.BASE_URL)}>
             <App />
           </BrowserRouter>
         </QueryClientProvider>
@@ -46,12 +48,14 @@ enableMocking().then(() => {
 
 ### basename and BASE_URL
 
-The `basename` prop uses `import.meta.env.BASE_URL`, a **built-in Vite variable** (no `VITE_` prefix needed) that mirrors the `base` value from `vite.config.ts`:
+`import.meta.env.BASE_URL` is a **built-in Vite variable** (no `VITE_` prefix needed) that mirrors the `base` value from `vite.config.ts`. However, Vite always includes a trailing slash while React Router expects no trailing slash:
 
-| Scenario | `base` in vite.config.ts | `BASE_URL` | Routes handled |
-|----------|--------------------------|------------|----------------|
-| Default (dev) | `/` | `/` | `/`, `/:id`, etc. |
-| Same-host deploy | `/_mfe/accounts/` | `/_mfe/accounts/` | `/_mfe/accounts/`, `/_mfe/accounts/:id`, etc. |
+| Source | Format | Example |
+|--------|--------|---------|
+| Vite `BASE_URL` | With trailing slash | `/_mfe/accounts/` |
+| React Router `basename` | No trailing slash | `/_mfe/accounts` |
+
+The `getRouterBasename()` utility from `@repo/core/shared/utils` handles this conversion, including empty or undefined values.
 
 ---
 
@@ -77,18 +81,20 @@ Key rules for `App.tsx`:
 
 ---
 
-## Common Pitfall: Missing `basename`
+## Common Pitfall: Missing or Incorrect `basename`
 
-If the MFE is deployed to a subpath (e.g., `/_mfe/accounts/`) without setting `basename` on the standalone `BrowserRouter`, React Router will fail to match routes:
+If the MFE is deployed to a subpath (e.g., `/_mfe/accounts/`) without setting `basename`, or using `BASE_URL` directly (which has a trailing slash), React Router will fail:
 
 ```
 No routes matched location "/_mfe/accounts"
 ```
 
-Fix: Use `import.meta.env.BASE_URL` as the `basename`:
+Fix: Use `getRouterBasename()` to normalize `BASE_URL`:
 
 ```typescript
-<BrowserRouter basename={import.meta.env.BASE_URL}>
+import { getRouterBasename } from '@repo/core/shared/utils';
+
+<BrowserRouter basename={getRouterBasename(import.meta.env.BASE_URL)}>
 ```
 
 ---
@@ -96,7 +102,7 @@ Fix: Use `import.meta.env.BASE_URL` as the `basename`:
 ## Checklist
 
 - [ ] `App.tsx` uses `<Routes>` only (no `BrowserRouter`)
-- [ ] `main.tsx` wraps `<App />` in `<BrowserRouter basename={import.meta.env.BASE_URL}>`
+- [ ] `main.tsx` uses `getRouterBasename(import.meta.env.BASE_URL)` for the `basename` prop
 - [ ] Federation config exposes `App.tsx`, not `main.tsx`
 - [ ] Shell mounts remote with wildcard path (e.g., `path="/accounts/*"`)
 

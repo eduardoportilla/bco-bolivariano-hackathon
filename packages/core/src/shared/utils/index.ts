@@ -13,3 +13,5 @@ export {
   isValidTransferAmount,
   validatePassword,
 } from './validators';
+
+export { getRouterBasename } from './routing';
