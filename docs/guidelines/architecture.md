@@ -541,8 +541,10 @@ apiClient.interceptors.request.use((config) => {
 
 ## Environment Variables
 
+### Runtime Variables (VITE_ prefix)
+
 ```bash
-# Web apps: VITE_ prefix
+# Web apps: VITE_ prefix (accessible at runtime via import.meta.env)
 VITE_API_URL=https://api.example.com
 VITE_APP_ENV=development
 
@@ -550,6 +552,25 @@ VITE_APP_ENV=development
 API_URL=https://api.example.com
 APP_ENV=development
 ```
+
+### Build-time Variables (Microfrontends)
+
+These variables are used in `vite.config.ts` at build time and don't need the `VITE_` prefix.
+
+| Variable | Used By | Description |
+|----------|---------|-------------|
+| `REMOTE_WEB_{NAME}_URL` | Shell | URL of the remote microfrontend |
+| `REMOTE_WEB_{NAME}_BASE_PATH` | Remote | Base path when deployed on same host |
+
+```bash
+# Shell (.env)
+REMOTE_WEB_ACCOUNTS_URL=https://app.example.com/accounts
+
+# Remote (.env) - used when deployed on same host, not at root
+REMOTE_WEB_ACCOUNTS_BASE_PATH=/accounts/
+```
+
+> **Reference:** See `docs/resources/references/mfe-env-vars.md` for detailed MFE configuration patterns and deployment scenarios.
 
 ---
 
