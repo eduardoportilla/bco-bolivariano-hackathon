@@ -52,5 +52,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "deploy" # Aquí es donde dejamos los archivos unidos
+          skip_app_build: true   # <--- ESTO EVITA QUE ORYX INTENTE DETECTAR EL LENGUAJE
           api_location: ""       # Si tuvieras una API de Azure Functions, iría aquí
           output_location: ""    # Lo dejamos vacío porque ya es el build final
